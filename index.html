@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Washin7 Manager</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .fade-in { animation: fadeIn 0.2s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    input:focus, textarea:focus { outline: none; }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useEffect, useCallback } = React;
+
+// ─── Opslag hulpfuncties ───────────────────────────────────────────────────────
+const store = {
+  get: (key, fallback = []) => {
+    try { return JSON.parse(localStorage.getItem('w7_' + key)) ?? fallback; }
+    catch { return fallback; }
+  },
+  set: (key, value) => {
+    try { localStorage.setItem('w7_' + key, JSON.stringify(value)); } catch {}
+  },
+};
+
+// ─── Iconen ───────────────────────────────────────────────────────────────────
+const Icon = ({ name, size = 22, className = '' }) => {
+  const icons = {
+    home: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+    tasks: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+    cart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>,
+    flag: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>,
+    plus: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    trash: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+    check: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+    user: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+    logout: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  };
+  return <span className={className}>{icons[name]}</span>;
+};
+
+// ─── Uniek ID generator ────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+// ─── Datum hulpfunctie ─────────────────────────────────────────────────────────
+const formatDatum = (iso) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+};
+
+// ─── Login scherm ──────────────────────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+  const [naam, setNaam] = useState('');
+
+  const handleLogin = (name) => {
+    if (!name.trim()) return;
+    onLogin(name.trim());
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-3xl font-black text-blue-700">W7</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Washin7</h1>
+          <p className="text-blue-200 mt-1">Bedrijfsmanager</p>
+        </div>
+
+        {/* Snelle selectie */}
+        <div className="bg-white rounded-2xl p-6 shadow-xl">
+          <p className="text-gray-600 text-sm font-medium mb-4 text-center">Wie ben jij?</p>
+          <div className="space-y-3 mb-5">
+            {['Nick', 'Assistent'].map(name => (
+              <button
+                key={name}
+                onClick={() => handleLogin(name)}
+                className="w-full bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border-2 border-blue-100 hover:border-blue-300 text-blue-800 font-semibold py-3 px-4 rounded-xl transition-all flex items-center gap-3"
+              >
+                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {name[0]}
+                </div>
+                {name}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
+            <div className="relative flex justify-center text-xs text-gray-400 bg-white px-2">of vul zelf in</div>
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Jouw naam..."
+              value={naam}
+              onChange={e => setNaam(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleLogin(naam)}
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-gray-800"
+            />
+            <button
+              onClick={() => handleLogin(naam)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+            >
+              Start
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function Dashboard({ user, taken, boodschappen, aandachtspunten, navigeer }) {
+  const openTaken = taken.filter(t => !t.voltooid);
+  const mijnTaken = openTaken.filter(t => t.toegewezenAan === user);
+  const openBoodschappen = boodschappen.filter(b => !b.afgevinkt);
+  const openAandachtspunten = aandachtspunten.filter(a => !a.afgevinkt);
+
+  const Card = ({ kleur, icoon, titel, aantal, sub, tab }) => (
+    <button
+      onClick={() => navigeer(tab)}
+      className={`w-full text-left bg-white rounded-2xl p-4 shadow-sm border border-gray-100 active:scale-95 transition-transform`}
+    >
+      <div className="flex items-start justify-between">
+        <div className={`w-10 h-10 ${kleur} rounded-xl flex items-center justify-center text-white mb-3`}>
+          <Icon name={icoon} size={18} />
+        </div>
+        <span className={`text-2xl font-bold ${aantal > 0 ? 'text-gray-800' : 'text-gray-300'}`}>{aantal}</span>
+      </div>
+      <p className="font-semibold text-gray-800 text-sm">{titel}</p>
+      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    </button>
+  );
+
+  return (
+    <div className="p-4 fade-in">
+      {/* Header */}
+      <div className="mb-6">
+        <p className="text-gray-400 text-sm">Goedendag,</p>
+        <h1 className="text-2xl font-bold text-gray-800">{user} 👋</h1>
+        <p className="text-gray-400 text-xs mt-1">
+          {new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </p>
+      </div>
+
+      {/* Overzicht kaarten */}
+      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Openstaand overzicht</h2>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <Card kleur="bg-blue-500" icoon="tasks" titel="Mijn taken" aantal={mijnTaken.length} sub={`${openTaken.length} totaal open`} tab="taken" />
+        <Card kleur="bg-orange-500" icoon="cart" titel="Boodschappen" aantal={openBoodschappen.length} sub="nog te halen" tab="boodschappen" />
+      </div>
+      <Card kleur="bg-purple-500" icoon="flag" titel="Aandachtspunten" aantal={openAandachtspunten.length} sub="voor aankomende periode" tab="aandachtspunten" />
+
+      {/* Recente activiteit */}
+      {mijnTaken.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Jouw openstaande taken</h2>
+          <div className="space-y-2">
+            {mijnTaken.slice(0, 3).map(t => (
+              <div key={t.id} className="bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                <span className="text-sm text-gray-700 flex-1">{t.tekst}</span>
+              </div>
+            ))}
+            {mijnTaken.length > 3 && (
+              <button onClick={() => navigeer('taken')} className="text-blue-500 text-sm font-medium pl-2">
+                +{mijnTaken.length - 3} meer bekijken →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Taken scherm ─────────────────────────────────────────────────────────────
+function TakenScreen({ user, taken, setTaken }) {
+  const [tekst, setTekst] = useState('');
+  const [toegewezen, setToegewezen] = useState(user);
+  const [filter, setFilter] = useState('open'); // 'open' | 'voltooid' | 'alles'
+  const [toonForm, setToonForm] = useState(false);
+
+  const voegToe = () => {
+    if (!tekst.trim()) return;
+    const nieuw = { id: uid(), tekst: tekst.trim(), toegewezenAan: toegewezen, toegewezenDoor: user, voltooid: false, aangemaakt: new Date().toISOString() };
+    const updated = [nieuw, ...taken];
+    setTaken(updated);
+    store.set('taken', updated);
+    setTekst('');
+    setToegewezen(user);
+    setToonForm(false);
+  };
+
+  const toggleVoltooid = (id) => {
+    const updated = taken.map(t => t.id === id ? { ...t, voltooid: !t.voltooid, voltooidOp: !t.voltooid ? new Date().toISOString() : null } : t);
+    setTaken(updated);
+    store.set('taken', updated);
+  };
+
+  const verwijder = (id) => {
+    const updated = taken.filter(t => t.id !== id);
+    setTaken(updated);
+    store.set('taken', updated);
+  };
+
+  const gefilterd = taken.filter(t => {
+    if (filter === 'open') return !t.voltooid;
+    if (filter === 'voltooid') return t.voltooid;
+    return true;
+  });
+
+  return (
+    <div className="p-4 fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">Taken</h1>
+        <button
+          onClick={() => setToonForm(!toonForm)}
+          className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-md active:scale-95 transition-transform"
+        >
+          <Icon name="plus" size={18} />
+        </button>
+      </div>
+
+      {/* Toevoeg formulier */}
+      {toonForm && (
+        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-blue-100 fade-in">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Nieuwe taak</p>
+          <textarea
+            placeholder="Omschrijving van de taak..."
+            value={tekst}
+            onChange={e => setTekst(e.target.value)}
+            rows={2}
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-3 resize-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+          />
+          <div className="flex gap-2 items-center mb-3">
+            <label className="text-xs text-gray-500 whitespace-nowrap">Voor:</label>
+            <div className="flex gap-2 flex-1">
+              {['Nick', 'Assistent'].map(naam => (
+                <button
+                  key={naam}
+                  onClick={() => setToegewezen(naam)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${toegewezen === naam ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                >
+                  {naam}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => { setToonForm(false); setTekst(''); }} className="flex-1 py-2 rounded-xl text-sm text-gray-500 bg-gray-100">Annuleer</button>
+            <button onClick={voegToe} className="flex-1 py-2 rounded-xl text-sm text-white font-semibold bg-blue-600 active:bg-blue-700">Toevoegen</button>
+          </div>
+        </div>
+      )}
+
+      {/* Filter tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-4">
+        {[['open', 'Open'], ['voltooid', 'Voltooid'], ['alles', 'Alles']].map(([val, label]) => (
+          <button key={val} onClick={() => setFilter(val)} className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filter === val ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Taken lijst */}
+      {gefilterd.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">
+          <Icon name="tasks" size={40} className="flex justify-center mb-3 opacity-30" />
+          <p className="text-sm">{filter === 'open' ? 'Geen openstaande taken!' : 'Geen taken gevonden.'}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {gefilterd.map(t => (
+            <div key={t.id} className={`bg-white rounded-2xl p-3.5 shadow-sm flex items-start gap-3 ${t.voltooid ? 'opacity-60' : ''}`}>
+              <button
+                onClick={() => toggleVoltooid(t.id)}
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${t.voltooid ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}
+              >
+                {t.voltooid && <Icon name="check" size={12} />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm text-gray-800 ${t.voltooid ? 'line-through text-gray-400' : ''}`}>{t.tekst}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">{t.toegewezenAan}</span>
+                  {t.toegewezenDoor !== t.toegewezenAan && (
+                    <span className="text-xs text-gray-400">van {t.toegewezenDoor}</span>
+                  )}
+                  <span className="text-xs text-gray-300">{formatDatum(t.aangemaakt)}</span>
+                </div>
+              </div>
+              <button onClick={() => verwijder(t.id)} className="text-gray-300 hover:text-red-400 active:text-red-600 transition-colors p-1">
+                <Icon name="trash" size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Boodschappenlijst scherm ─────────────────────────────────────────────────
+function BoodschappenScreen({ user, boodschappen, setBoodschappen }) {
+  const [tekst, setTekst] = useState('');
+  const [hoeveelheid, setHoeveelheid] = useState('');
+  const [toonVoltooid, setToonVoltooid] = useState(false);
+
+  const voegToe = () => {
+    if (!tekst.trim()) return;
+    const nieuw = {
+      id: uid(),
+      naam: tekst.trim(),
+      hoeveelheid: hoeveelheid.trim(),
+      afgevinkt: false,
+      toegevoegdDoor: user,
+      aangemaakt: new Date().toISOString()
+    };
+    const updated = [nieuw, ...boodschappen];
+    setBoodschappen(updated);
+    store.set('boodschappen', updated);
+    setTekst('');
+    setHoeveelheid('');
+  };
+
+  const toggleAfgevinkt = (id) => {
+    const updated = boodschappen.map(b => b.id === id ? { ...b, afgevinkt: !b.afgevinkt } : b);
+    setBoodschappen(updated);
+    store.set('boodschappen', updated);
+  };
+
+  const verwijder = (id) => {
+    const updated = boodschappen.filter(b => b.id !== id);
+    setBoodschappen(updated);
+    store.set('boodschappen', updated);
+  };
+
+  const verwijderAfgevinkt = () => {
+    const updated = boodschappen.filter(b => !b.afgevinkt);
+    setBoodschappen(updated);
+    store.set('boodschappen', updated);
+  };
+
+  const openItems = boodschappen.filter(b => !b.afgevinkt);
+  const afgevinktItems = boodschappen.filter(b => b.afgevinkt);
+
+  return (
+    <div className="p-4 fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">Boodschappen</h1>
+        <span className="text-sm text-gray-400">{openItems.length} open</span>
+      </div>
+
+      {/* Toevoegen */}
+      <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            placeholder="Product toevoegen..."
+            value={tekst}
+            onChange={e => setTekst(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && voegToe()}
+            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:border-orange-400 focus:ring-2 focus:ring-orange-50"
+          />
+          <input
+            type="text"
+            placeholder="Hoeveel?"
+            value={hoeveelheid}
+            onChange={e => setHoeveelheid(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && voegToe()}
+            className="w-24 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:border-orange-400 focus:ring-2 focus:ring-orange-50"
+          />
+        </div>
+        <button
+          onClick={voegToe}
+          className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+        >
+          <Icon name="plus" size={16} />
+          Toevoegen
+        </button>
+      </div>
+
+      {/* Open items */}
+      {openItems.length === 0 && afgevinktItems.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">
+          <Icon name="cart" size={40} className="flex justify-center mb-3 opacity-30" />
+          <p className="text-sm">Boodschappenlijst is leeg.</p>
+          <p className="text-xs mt-1">Voeg hierboven een product toe.</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {openItems.map(b => (
+              <div key={b.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
+                <button
+                  onClick={() => toggleAfgevinkt(b.id)}
+                  className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0 flex items-center justify-center hover:border-orange-400 transition-colors"
+                />
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-gray-800">{b.naam}</span>
+                  {b.hoeveelheid && <span className="text-xs text-orange-600 ml-2 font-medium">{b.hoeveelheid}</span>}
+                </div>
+                <span className="text-xs text-gray-300">{b.toegevoegdDoor}</span>
+                <button onClick={() => verwijder(b.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
+                  <Icon name="trash" size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Afgevinkte items */}
+          {afgevinktItems.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <button onClick={() => setToonVoltooid(!toonVoltooid)} className="text-xs text-gray-400 font-medium">
+                  {toonVoltooid ? '▲' : '▶'} Afgevinkt ({afgevinktItems.length})
+                </button>
+                <button onClick={verwijderAfgevinkt} className="text-xs text-red-400 font-medium">
+                  Verwijder afgevinkt
+                </button>
+              </div>
+              {toonVoltooid && (
+                <div className="space-y-2">
+                  {afgevinktItems.map(b => (
+                    <div key={b.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 opacity-50">
+                      <button
+                        onClick={() => toggleAfgevinkt(b.id)}
+                        className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex-shrink-0 flex items-center justify-center text-white"
+                      >
+                        <Icon name="check" size={12} />
+                      </button>
+                      <span className="text-sm text-gray-400 line-through flex-1">{b.naam}{b.hoeveelheid ? ` — ${b.hoeveelheid}` : ''}</span>
+                      <button onClick={() => verwijder(b.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
+                        <Icon name="trash" size={15} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Aandachtspunten scherm ───────────────────────────────────────────────────
+function AandachtspuntenScreen({ user, aandachtspunten, setAandachtspunten }) {
+  const [tekst, setTekst] = useState('');
+  const [beschrijving, setBeschrijving] = useState('');
+  const [toonForm, setToonForm] = useState(false);
+  const [toonAfgevinkt, setToonAfgevinkt] = useState(false);
+
+  const voegToe = () => {
+    if (!tekst.trim()) return;
+    const nieuw = {
+      id: uid(),
+      titel: tekst.trim(),
+      beschrijving: beschrijving.trim(),
+      afgevinkt: false,
+      toegevoegdDoor: user,
+      aangemaakt: new Date().toISOString()
+    };
+    const updated = [nieuw, ...aandachtspunten];
+    setAandachtspunten(updated);
+    store.set('aandachtspunten', updated);
+    setTekst('');
+    setBeschrijving('');
+    setToonForm(false);
+  };
+
+  const toggleAfgevinkt = (id) => {
+    const updated = aandachtspunten.map(a => a.id === id ? { ...a, afgevinkt: !a.afgevinkt, afgevinktOp: !a.afgevinkt ? new Date().toISOString() : null } : a);
+    setAandachtspunten(updated);
+    store.set('aandachtspunten', updated);
+  };
+
+  const verwijder = (id) => {
+    const updated = aandachtspunten.filter(a => a.id !== id);
+    setAandachtspunten(updated);
+    store.set('aandachtspunten', updated);
+  };
+
+  const openItems = aandachtspunten.filter(a => !a.afgevinkt);
+  const afgevinktItems = aandachtspunten.filter(a => a.afgevinkt);
+
+  return (
+    <div className="p-4 fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Aandachtspunten</h1>
+          <p className="text-xs text-gray-400 mt-0.5">Aankomende periode</p>
+        </div>
+        <button
+          onClick={() => setToonForm(!toonForm)}
+          className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-md active:scale-95 transition-transform"
+        >
+          <Icon name="plus" size={18} />
+        </button>
+      </div>
+
+      {/* Toevoeg formulier */}
+      {toonForm && (
+        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-purple-100 fade-in">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Nieuw aandachtspunt</p>
+          <input
+            type="text"
+            placeholder="Aandachtspunt..."
+            value={tekst}
+            onChange={e => setTekst(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-2 focus:border-purple-400 focus:ring-2 focus:ring-purple-50"
+          />
+          <textarea
+            placeholder="Extra toelichting (optioneel)..."
+            value={beschrijving}
+            onChange={e => setBeschrijving(e.target.value)}
+            rows={2}
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-3 resize-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50"
+          />
+          <div className="flex gap-2">
+            <button onClick={() => { setToonForm(false); setTekst(''); setBeschrijving(''); }} className="flex-1 py-2 rounded-xl text-sm text-gray-500 bg-gray-100">Annuleer</button>
+            <button onClick={voegToe} className="flex-1 py-2 rounded-xl text-sm text-white font-semibold bg-purple-600 active:bg-purple-700">Toevoegen</button>
+          </div>
+        </div>
+      )}
+
+      {openItems.length === 0 && afgevinktItems.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">
+          <Icon name="flag" size={40} className="flex justify-center mb-3 opacity-30" />
+          <p className="text-sm">Geen aandachtspunten.</p>
+          <p className="text-xs mt-1">Klik op + om een aandachtspunt toe te voegen.</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {openItems.map(a => (
+              <div key={a.id} className="bg-white rounded-2xl p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <button
+                    onClick={() => toggleAfgevinkt(a.id)}
+                    className="w-6 h-6 rounded-full border-2 border-purple-300 flex-shrink-0 flex items-center justify-center mt-0.5 hover:border-purple-500 transition-colors"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">{a.titel}</p>
+                    {a.beschrijving && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{a.beschrijving}</p>}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded-full">{a.toegevoegdDoor}</span>
+                      <span className="text-xs text-gray-300">{formatDatum(a.aangemaakt)}</span>
+                    </div>
+                  </div>
+                  <button onClick={() => verwijder(a.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
+                    <Icon name="trash" size={15} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {afgevinktItems.length > 0 && (
+            <div className="mt-4">
+              <button onClick={() => setToonAfgevinkt(!toonAfgevinkt)} className="text-xs text-gray-400 font-medium mb-2 block">
+                {toonAfgevinkt ? '▲' : '▶'} Afgehandeld ({afgevinktItems.length})
+              </button>
+              {toonAfgevinkt && (
+                <div className="space-y-2">
+                  {afgevinktItems.map(a => (
+                    <div key={a.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 opacity-50">
+                      <button onClick={() => toggleAfgevinkt(a.id)} className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex-shrink-0 flex items-center justify-center text-white">
+                        <Icon name="check" size={12} />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-400 line-through">{a.titel}</p>
+                      </div>
+                      <button onClick={() => verwijder(a.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
+                        <Icon name="trash" size={15} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Navigatie balk ────────────────────────────────────────────────────────────
+function NavBar({ actief, navigeer, telTaken, telBoodschappen, telAandachtspunten }) {
+  const tabs = [
+    { id: 'home', icon: 'home', label: 'Home', tel: 0 },
+    { id: 'taken', icon: 'tasks', label: 'Taken', tel: telTaken },
+    { id: 'boodschappen', icon: 'cart', label: 'Boodschappen', tel: telBoodschappen },
+    { id: 'aandachtspunten', icon: 'flag', label: 'Aandacht', tel: telAandachtspunten },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom shadow-lg">
+      <div className="max-w-lg mx-auto flex">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => navigeer(tab.id)}
+            className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 relative transition-colors ${actief === tab.id ? 'text-blue-600' : 'text-gray-400'}`}
+          >
+            {tab.tel > 0 && (
+              <span className="absolute top-1.5 right-1/4 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
+                {tab.tel > 9 ? '9+' : tab.tel}
+              </span>
+            )}
+            <Icon name={tab.icon} size={20} />
+            <span className="text-[10px] font-medium">{tab.label}</span>
+            {actief === tab.id && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// ─── Hoofd App ─────────────────────────────────────────────────────────────────
+function App() {
+  const [user, setUser] = useState(() => store.get('user', null));
+  const [actieveTab, setActieveTab] = useState('home');
+  const [taken, setTaken] = useState(() => store.get('taken', []));
+  const [boodschappen, setBoodschappen] = useState(() => store.get('boodschappen', []));
+  const [aandachtspunten, setAandachtspunten] = useState(() => store.get('aandachtspunten', []));
+
+  const handleLogin = (naam) => {
+    store.set('user', naam);
+    setUser(naam);
+  };
+
+  const handleLogout = () => {
+    store.set('user', null);
+    setUser(null);
+    setActieveTab('home');
+  };
+
+  if (!user) return <LoginScreen onLogin={handleLogin} />;
+
+  const openTaken = taken.filter(t => !t.voltooid && t.toegewezenAan === user).length;
+  const openBoodschappen = boodschappen.filter(b => !b.afgevinkt).length;
+  const openAandachtspunten = aandachtspunten.filter(a => !a.afgevinkt).length;
+
+  return (
+    <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-black text-xs">W7</span>
+          </div>
+          <span className="font-bold text-gray-800 text-sm">Washin7</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <Icon name="user" size={15} />
+            <span className="text-sm font-medium">{user}</span>
+          </div>
+          <button onClick={handleLogout} className="text-gray-400 hover:text-gray-600 transition-colors" title="Uitloggen">
+            <Icon name="logout" size={16} />
+          </button>
+        </div>
+      </header>
+
+      {/* Scherm inhoud */}
+      <main className="pb-24">
+        {actieveTab === 'home' && (
+          <Dashboard
+            user={user}
+            taken={taken}
+            boodschappen={boodschappen}
+            aandachtspunten={aandachtspunten}
+            navigeer={setActieveTab}
+          />
+        )}
+        {actieveTab === 'taken' && (
+          <TakenScreen user={user} taken={taken} setTaken={setTaken} />
+        )}
+        {actieveTab === 'boodschappen' && (
+          <BoodschappenScreen user={user} boodschappen={boodschappen} setBoodschappen={setBoodschappen} />
+        )}
+        {actieveTab === 'aandachtspunten' && (
+          <AandachtspuntenScreen user={user} aandachtspunten={aandachtspunten} setAandachtspunten={setAandachtspunten} />
+        )}
+      </main>
+
+      {/* Navigatie */}
+      <NavBar
+        actief={actieveTab}
+        navigeer={setActieveTab}
+        telTaken={openTaken}
+        telBoodschappen={openBoodschappen}
+        telAandachtspunten={openAandachtspunten}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
