@@ -1,722 +1,644 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Washin7 Manager</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    * { -webkit-tap-highlight-color: transparent; }
-    body { background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .fade-in { animation: fadeIn 0.2s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    input:focus, textarea:focus { outline: none; }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Washin7 Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;min-height:100vh}
+button{border:none;cursor:pointer;font-family:inherit}
+input,textarea{font-family:inherit;font-size:14px}
+textarea{resize:none}
+
+/* Layout */
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:#f1f5f9;position:relative}
+.header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.header-logo{display:flex;align-items:center;gap:8px}
+.logo-badge{width:28px;height:28px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:11px}
+.header-title{font-weight:700;font-size:14px;color:#1e293b}
+.header-right{display:flex;align-items:center;gap:12px}
+.user-pill{display:flex;align-items:center;gap:6px;color:#64748b;font-size:13px;font-weight:500}
+.btn-logout{background:none;color:#94a3b8;padding:4px;border-radius:6px;display:flex}
+.btn-logout:hover{color:#64748b}
+main{padding-bottom:80px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -1px 8px rgba(0,0,0,.06);z-index:100}
+.nav-inner{max-width:480px;margin:0 auto;display:flex}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:2px;background:none;color:#94a3b8;font-size:10px;font-weight:500;position:relative;transition:color .15s}
+.nav-btn.active{color:#2563eb}
+.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:#2563eb;border-radius:0 0 2px 2px}
+.nav-badge{position:absolute;top:6px;right:calc(50% - 14px);background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* Login */
+.login-screen{min-height:100vh;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.login-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:340px;box-shadow:0 20px 40px rgba(0,0,0,.15)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo-badge{width:72px;height:72px;background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.login-logo-badge span{font-size:26px;font-weight:900;color:#2563eb}
+.login-logo h1{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px}
+.login-logo p{color:rgba(255,255,255,.7);font-size:14px}
+.login-label{font-size:13px;color:#64748b;font-weight:500;text-align:center;margin-bottom:14px}
+.login-user-btn{width:100%;background:#eff6ff;border:2px solid #dbeafe;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;color:#1e40af;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:all .15s}
+.login-user-btn:hover{background:#dbeafe;border-color:#bfdbfe}
+.login-user-btn:active{background:#bfdbfe}
+.login-avatar{width:36px;height:36px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.divider{display:flex;align-items:center;gap:8px;margin:14px 0;color:#94a3b8;font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.login-custom{display:flex;gap:8px}
+.input{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;color:#1e293b;background:#fff;width:100%;transition:border-color .15s}
+.input:focus{border-color:#2563eb;outline:none;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.btn-primary{background:#2563eb;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:background .15s;white-space:nowrap}
+.btn-primary:hover{background:#1d4ed8}
+.btn-primary:active{background:#1e40af}
+
+/* Cards */
+.page{padding:16px;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #f1f5f9}
+.card+.card{margin-top:10px}
+
+/* Dashboard */
+.greeting-name{font-size:22px;font-weight:700;color:#1e293b}
+.greeting-date{font-size:12px;color:#94a3b8;margin-top:2px}
+.section-label{font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;margin:16px 0 10px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.dash-card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #f1f5f9;text-align:left;cursor:pointer;transition:transform .1s;width:100%}
+.dash-card:active{transform:scale(.97)}
+.dash-card-full{grid-column:1/-1}
+.dash-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.dash-icon svg{width:18px;height:18px;color:#fff;stroke:#fff}
+.dash-count{font-size:22px;font-weight:700;color:#1e293b;float:right;margin-top:-6px}
+.dash-count.zero{color:#cbd5e1}
+.dash-title{font-size:13px;font-weight:600;color:#1e293b;clear:both}
+.dash-sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.task-preview{background:#fff;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 2px rgba(0,0,0,.05);margin-bottom:8px}
+.dot{width:7px;height:7px;background:#3b82f6;border-radius:50%;flex-shrink:0}
+.task-preview-text{font-size:13px;color:#374151;flex:1}
+.more-link{font-size:13px;color:#3b82f6;font-weight:500;background:none;padding:4px 0}
+
+/* Form */
+.form-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:2px solid #eff6ff;margin-bottom:12px;animation:fadeIn .15s ease}
+.form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:10px}
+.form-row{display:flex;gap:8px;margin-bottom:8px}
+.form-actions{display:flex;gap:8px;margin-top:12px}
+.btn-cancel{flex:1;padding:9px;border-radius:10px;font-size:13px;color:#64748b;background:#f1f5f9;font-weight:500}
+.btn-save{flex:1;padding:9px;border-radius:10px;font-size:13px;color:#fff;font-weight:600}
+.btn-save.blue{background:#2563eb}
+.btn-save.orange{background:#f97316}
+.btn-save.purple{background:#9333ea}
+
+/* Filter tabs */
+.tabs{display:flex;gap:3px;background:#f1f5f9;padding:4px;border-radius:10px;margin-bottom:14px}
+.tab{flex:1;padding:6px;border-radius:7px;font-size:12px;font-weight:600;color:#64748b;background:none;transition:all .15s}
+.tab.active{background:#fff;color:#1e293b;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Item rows */
+.item-row{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.item-row.dimmed{opacity:.55}
+.check-btn{width:24px;height:24px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:none;transition:all .15s}
+.check-btn.done{background:#22c55e;border-color:#22c55e}
+.check-btn.blue-ring{border-color:#93c5fd}
+.check-btn.purple-ring{border-color:#d8b4fe}
+.check-btn:hover.blue-ring{border-color:#2563eb}
+.check-btn:hover.purple-ring{border-color:#9333ea}
+.item-body{flex:1;min-width:0}
+.item-title{font-size:14px;color:#1e293b}
+.item-title.struck{text-decoration:line-through;color:#94a3b8}
+.item-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.tag.blue{background:#eff6ff;color:#2563eb}
+.tag.purple{background:#faf5ff;color:#9333ea}
+.tag.orange{background:#fff7ed;color:#ea580c}
+.meta-text{font-size:11px;color:#94a3b8}
+.delete-btn{color:#cbd5e1;background:none;padding:4px;border-radius:6px;transition:color .15s;flex-shrink:0}
+.delete-btn:hover{color:#ef4444}
+.empty-state{text-align:center;padding:48px 0;color:#94a3b8}
+.empty-state p{font-size:14px}
+.empty-state small{font-size:12px;margin-top:4px;display:block}
+
+/* Page header */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:700;color:#1e293b}
+.page-subtitle{font-size:11px;color:#94a3b8;margin-top:2px}
+.fab{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .1s}
+.fab:active{transform:scale(.93)}
+.fab.blue{background:#2563eb}
+.fab.orange{background:#f97316}
+.fab.purple{background:#9333ea}
+
+/* For/By labels */
+.assign-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.assign-label{font-size:12px;color:#64748b;white-space:nowrap}
+.assign-btns{display:flex;gap:6px;flex:1}
+.assign-btn{flex:1;padding:6px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;transition:all .15s}
+.assign-btn.selected{background:#2563eb;color:#fff;border-color:#2563eb}
+
+/* Collapsed section */
+.collapse-btn{background:none;font-size:12px;color:#94a3b8;font-weight:500;padding:4px 0;display:flex;align-items:center;gap:4px}
+.collapse-actions{display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px}
+.del-done-btn{font-size:12px;color:#ef4444;font-weight:500;background:none}
+
+/* Icons (inline SVG via JS) */
+</style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
+<div id="app"></div>
 
-const { useState, useEffect, useCallback } = React;
-
-// ─── Opslag hulpfuncties ───────────────────────────────────────────────────────
-const store = {
-  get: (key, fallback = []) => {
-    try { return JSON.parse(localStorage.getItem('w7_' + key)) ?? fallback; }
-    catch { return fallback; }
-  },
-  set: (key, value) => {
-    try { localStorage.setItem('w7_' + key, JSON.stringify(value)); } catch {}
-  },
+<script>
+// ── Data opslag ──────────────────────────────────────────────────────────────
+const S = {
+  get(k, fb){ try{ return JSON.parse(localStorage.getItem('w7_'+k))??fb }catch{ return fb } },
+  set(k,v){ try{ localStorage.setItem('w7_'+k,JSON.stringify(v)) }catch{} }
 };
 
-// ─── Iconen ───────────────────────────────────────────────────────────────────
-const Icon = ({ name, size = 22, className = '' }) => {
-  const icons = {
-    home: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-    tasks: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
-    cart: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>,
-    flag: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>,
-    plus: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-    trash: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
-    check: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-    user: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-    logout: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-  };
-  return <span className={className}>{icons[name]}</span>;
-};
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 
-// ─── Uniek ID generator ────────────────────────────────────────────────────────
-const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
-
-// ─── Datum hulpfunctie ─────────────────────────────────────────────────────────
-const formatDatum = (iso) => {
+const fmtDate = iso => {
   const d = new Date(iso);
-  return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}) + ' ' +
+    d.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'});
 };
 
-// ─── Login scherm ──────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin }) {
-  const [naam, setNaam] = useState('');
+const icon = {
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  tasks: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+  cart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
+  flag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>`,
+  user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+};
 
-  const handleLogin = (name) => {
-    if (!name.trim()) return;
-    onLogin(name.trim());
-  };
+// ── App State ────────────────────────────────────────────────────────────────
+const state = {
+  user: S.get('user', null),
+  tab: 'home',
+  taken: S.get('taken', []),
+  boodschappen: S.get('boodschappen', []),
+  aandachtspunten: S.get('aandachtspunten', []),
+  // UI state
+  takenFilter: 'open',
+  takenForm: false,
+  takenTekst: '',
+  takenVoor: 'Nick',
+  boodschappenTekst: '',
+  boodschappenHoeveel: '',
+  boodschappenToonAfgevinkt: false,
+  aandachtForm: false,
+  aandachtTekst: '',
+  aandachtBeschrijving: '',
+  aandachtToonAfgevinkt: false,
+};
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl font-black text-blue-700">W7</span>
-          </div>
-          <h1 className="text-3xl font-bold text-white">Washin7</h1>
-          <p className="text-blue-200 mt-1">Bedrijfsmanager</p>
-        </div>
+// ── Render engine ────────────────────────────────────────────────────────────
+const app = document.getElementById('app');
 
-        {/* Snelle selectie */}
-        <div className="bg-white rounded-2xl p-6 shadow-xl">
-          <p className="text-gray-600 text-sm font-medium mb-4 text-center">Wie ben jij?</p>
-          <div className="space-y-3 mb-5">
-            {['Nick', 'Assistent'].map(name => (
-              <button
-                key={name}
-                onClick={() => handleLogin(name)}
-                className="w-full bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border-2 border-blue-100 hover:border-blue-300 text-blue-800 font-semibold py-3 px-4 rounded-xl transition-all flex items-center gap-3"
-              >
-                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {name[0]}
-                </div>
-                {name}
-              </button>
-            ))}
-          </div>
+function render() {
+  if (!state.user) { renderLogin(); return; }
+  renderApp();
+}
 
-          <div className="relative mb-4">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-            <div className="relative flex justify-center text-xs text-gray-400 bg-white px-2">of vul zelf in</div>
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Jouw naam..."
-              value={naam}
-              onChange={e => setNaam(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin(naam)}
-              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-gray-800"
-            />
-            <button
-              onClick={() => handleLogin(naam)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors"
-            >
-              Start
-            </button>
-          </div>
-        </div>
+// ── Login ────────────────────────────────────────────────────────────────────
+function renderLogin() {
+  app.innerHTML = `
+  <div class="login-screen">
+    <div class="login-logo">
+      <div class="login-logo-badge"><span>W7</span></div>
+      <h1>Washin7</h1>
+      <p>Bedrijfsmanager</p>
+    </div>
+    <div class="login-card">
+      <p class="login-label">Wie ben jij?</p>
+      <button class="login-user-btn" data-name="Nick">
+        <div class="login-avatar">N</div> Nick
+      </button>
+      <button class="login-user-btn" data-name="Assistent">
+        <div class="login-avatar">A</div> Assistent
+      </button>
+      <div class="divider">of vul zelf in</div>
+      <div class="login-custom">
+        <input id="custom-name" class="input" placeholder="Jouw naam..." />
+        <button class="btn-primary" id="login-btn">Start</button>
       </div>
     </div>
+  </div>`;
+
+  app.querySelectorAll('[data-name]').forEach(btn =>
+    btn.addEventListener('click', () => doLogin(btn.dataset.name))
+  );
+  document.getElementById('login-btn').addEventListener('click', () =>
+    doLogin(document.getElementById('custom-name').value)
+  );
+  document.getElementById('custom-name').addEventListener('keydown', e =>
+    e.key === 'Enter' && doLogin(e.target.value)
   );
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-function Dashboard({ user, taken, boodschappen, aandachtspunten, navigeer }) {
-  const openTaken = taken.filter(t => !t.voltooid);
-  const mijnTaken = openTaken.filter(t => t.toegewezenAan === user);
-  const openBoodschappen = boodschappen.filter(b => !b.afgevinkt);
-  const openAandachtspunten = aandachtspunten.filter(a => !a.afgevinkt);
-
-  const Card = ({ kleur, icoon, titel, aantal, sub, tab }) => (
-    <button
-      onClick={() => navigeer(tab)}
-      className={`w-full text-left bg-white rounded-2xl p-4 shadow-sm border border-gray-100 active:scale-95 transition-transform`}
-    >
-      <div className="flex items-start justify-between">
-        <div className={`w-10 h-10 ${kleur} rounded-xl flex items-center justify-center text-white mb-3`}>
-          <Icon name={icoon} size={18} />
-        </div>
-        <span className={`text-2xl font-bold ${aantal > 0 ? 'text-gray-800' : 'text-gray-300'}`}>{aantal}</span>
-      </div>
-      <p className="font-semibold text-gray-800 text-sm">{titel}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
-    </button>
-  );
-
-  return (
-    <div className="p-4 fade-in">
-      {/* Header */}
-      <div className="mb-6">
-        <p className="text-gray-400 text-sm">Goedendag,</p>
-        <h1 className="text-2xl font-bold text-gray-800">{user} 👋</h1>
-        <p className="text-gray-400 text-xs mt-1">
-          {new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
-        </p>
-      </div>
-
-      {/* Overzicht kaarten */}
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Openstaand overzicht</h2>
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <Card kleur="bg-blue-500" icoon="tasks" titel="Mijn taken" aantal={mijnTaken.length} sub={`${openTaken.length} totaal open`} tab="taken" />
-        <Card kleur="bg-orange-500" icoon="cart" titel="Boodschappen" aantal={openBoodschappen.length} sub="nog te halen" tab="boodschappen" />
-      </div>
-      <Card kleur="bg-purple-500" icoon="flag" titel="Aandachtspunten" aantal={openAandachtspunten.length} sub="voor aankomende periode" tab="aandachtspunten" />
-
-      {/* Recente activiteit */}
-      {mijnTaken.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Jouw openstaande taken</h2>
-          <div className="space-y-2">
-            {mijnTaken.slice(0, 3).map(t => (
-              <div key={t.id} className="bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                <span className="text-sm text-gray-700 flex-1">{t.tekst}</span>
-              </div>
-            ))}
-            {mijnTaken.length > 3 && (
-              <button onClick={() => navigeer('taken')} className="text-blue-500 text-sm font-medium pl-2">
-                +{mijnTaken.length - 3} meer bekijken →
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function doLogin(naam) {
+  naam = naam.trim();
+  if (!naam) return;
+  state.user = naam;
+  state.takenVoor = naam;
+  S.set('user', naam);
+  render();
 }
 
-// ─── Taken scherm ─────────────────────────────────────────────────────────────
-function TakenScreen({ user, taken, setTaken }) {
-  const [tekst, setTekst] = useState('');
-  const [toegewezen, setToegewezen] = useState(user);
-  const [filter, setFilter] = useState('open'); // 'open' | 'voltooid' | 'alles'
-  const [toonForm, setToonForm] = useState(false);
+// ── App shell ────────────────────────────────────────────────────────────────
+function renderApp() {
+  const openTaken = state.taken.filter(t => !t.voltooid && t.voor === state.user).length;
+  const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
+  const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
 
-  const voegToe = () => {
-    if (!tekst.trim()) return;
-    const nieuw = { id: uid(), tekst: tekst.trim(), toegewezenAan: toegewezen, toegewezenDoor: user, voltooid: false, aangemaakt: new Date().toISOString() };
-    const updated = [nieuw, ...taken];
-    setTaken(updated);
-    store.set('taken', updated);
-    setTekst('');
-    setToegewezen(user);
-    setToonForm(false);
-  };
+  const badge = n => n > 0 ? `<span class="nav-badge">${n > 9 ? '9+' : n}</span>` : '';
 
-  const toggleVoltooid = (id) => {
-    const updated = taken.map(t => t.id === id ? { ...t, voltooid: !t.voltooid, voltooidOp: !t.voltooid ? new Date().toISOString() : null } : t);
-    setTaken(updated);
-    store.set('taken', updated);
-  };
+  app.innerHTML = `
+  <div class="header">
+    <div class="header-logo">
+      <div class="logo-badge">W7</div>
+      <span class="header-title">Washin7</span>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">${icon.user} ${state.user}</div>
+      <button class="btn-logout" id="logout-btn" title="Uitloggen">${icon.logout}</button>
+    </div>
+  </div>
+  <main id="main-content"></main>
+  <nav class="nav">
+    <div class="nav-inner">
+      <button class="nav-btn ${state.tab==='home'?'active':''}" data-tab="home">${icon.home}<span>Home</span></button>
+      <button class="nav-btn ${state.tab==='taken'?'active':''}" data-tab="taken">${badge(openTaken)}${icon.tasks}<span>Taken</span></button>
+      <button class="nav-btn ${state.tab==='boodschappen'?'active':''}" data-tab="boodschappen">${badge(openBoodschappen)}${icon.cart}<span>Boodschappen</span></button>
+      <button class="nav-btn ${state.tab==='aandachtspunten'?'active':''}" data-tab="aandachtspunten">${badge(openAandachtspunten)}${icon.flag}<span>Aandacht</span></button>
+    </div>
+  </nav>`;
 
-  const verwijder = (id) => {
-    const updated = taken.filter(t => t.id !== id);
-    setTaken(updated);
-    store.set('taken', updated);
-  };
-
-  const gefilterd = taken.filter(t => {
-    if (filter === 'open') return !t.voltooid;
-    if (filter === 'voltooid') return t.voltooid;
-    return true;
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    state.user = null; S.set('user', null); render();
   });
+  app.querySelectorAll('[data-tab]').forEach(btn =>
+    btn.addEventListener('click', () => { state.tab = btn.dataset.tab; render(); })
+  );
 
-  return (
-    <div className="p-4 fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Taken</h1>
-        <button
-          onClick={() => setToonForm(!toonForm)}
-          className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-md active:scale-95 transition-transform"
-        >
-          <Icon name="plus" size={18} />
-        </button>
-      </div>
+  const main = document.getElementById('main-content');
+  if (state.tab === 'home') renderDashboard(main);
+  else if (state.tab === 'taken') renderTaken(main);
+  else if (state.tab === 'boodschappen') renderBoodschappen(main);
+  else renderAandachtspunten(main);
+}
 
-      {/* Toevoeg formulier */}
-      {toonForm && (
-        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-blue-100 fade-in">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Nieuwe taak</p>
-          <textarea
-            placeholder="Omschrijving van de taak..."
-            value={tekst}
-            onChange={e => setTekst(e.target.value)}
-            rows={2}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-3 resize-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
-          />
-          <div className="flex gap-2 items-center mb-3">
-            <label className="text-xs text-gray-500 whitespace-nowrap">Voor:</label>
-            <div className="flex gap-2 flex-1">
-              {['Nick', 'Assistent'].map(naam => (
-                <button
-                  key={naam}
-                  onClick={() => setToegewezen(naam)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${toegewezen === naam ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}
-                >
-                  {naam}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => { setToonForm(false); setTekst(''); }} className="flex-1 py-2 rounded-xl text-sm text-gray-500 bg-gray-100">Annuleer</button>
-            <button onClick={voegToe} className="flex-1 py-2 rounded-xl text-sm text-white font-semibold bg-blue-600 active:bg-blue-700">Toevoegen</button>
-          </div>
-        </div>
-      )}
+// ── Dashboard ────────────────────────────────────────────────────────────────
+function renderDashboard(el) {
+  const mijnOpen = state.taken.filter(t => !t.voltooid && t.voor === state.user);
+  const totaalOpen = state.taken.filter(t => !t.voltooid).length;
+  const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
+  const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-4">
-        {[['open', 'Open'], ['voltooid', 'Voltooid'], ['alles', 'Alles']].map(([val, label]) => (
-          <button key={val} onClick={() => setFilter(val)} className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filter === val ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
+  const countClass = n => n > 0 ? '' : ' zero';
 
-      {/* Taken lijst */}
-      {gefilterd.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <Icon name="tasks" size={40} className="flex justify-center mb-3 opacity-30" />
-          <p className="text-sm">{filter === 'open' ? 'Geen openstaande taken!' : 'Geen taken gevonden.'}</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {gefilterd.map(t => (
-            <div key={t.id} className={`bg-white rounded-2xl p-3.5 shadow-sm flex items-start gap-3 ${t.voltooid ? 'opacity-60' : ''}`}>
-              <button
-                onClick={() => toggleVoltooid(t.id)}
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${t.voltooid ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}
-              >
-                {t.voltooid && <Icon name="check" size={12} />}
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm text-gray-800 ${t.voltooid ? 'line-through text-gray-400' : ''}`}>{t.tekst}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">{t.toegewezenAan}</span>
-                  {t.toegewezenDoor !== t.toegewezenAan && (
-                    <span className="text-xs text-gray-400">van {t.toegewezenDoor}</span>
-                  )}
-                  <span className="text-xs text-gray-300">{formatDatum(t.aangemaakt)}</span>
-                </div>
-              </div>
-              <button onClick={() => verwijder(t.id)} className="text-gray-300 hover:text-red-400 active:text-red-600 transition-colors p-1">
-                <Icon name="trash" size={15} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+  el.innerHTML = `<div class="page">
+    <p style="font-size:13px;color:#94a3b8">Goedendag,</p>
+    <p class="greeting-name">${state.user} 👋</p>
+    <p class="greeting-date">${new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'})}</p>
+
+    <p class="section-label">Openstaand overzicht</p>
+    <div class="dash-grid">
+      <button class="dash-card" data-goto="taken">
+        <div class="dash-icon" style="background:#3b82f6">${icon.tasks}</div>
+        <span class="dash-count${countClass(mijnOpen.length)}">${mijnOpen.length}</span>
+        <div class="dash-title">Mijn taken</div>
+        <div class="dash-sub">${totaalOpen} totaal open</div>
+      </button>
+      <button class="dash-card" data-goto="boodschappen">
+        <div class="dash-icon" style="background:#f97316">${icon.cart}</div>
+        <span class="dash-count${countClass(openBoodschappen)}">${openBoodschappen}</span>
+        <div class="dash-title">Boodschappen</div>
+        <div class="dash-sub">nog te halen</div>
+      </button>
+      <button class="dash-card dash-card-full" data-goto="aandachtspunten">
+        <div class="dash-icon" style="background:#9333ea">${icon.flag}</div>
+        <span class="dash-count${countClass(openAandachtspunten)}">${openAandachtspunten}</span>
+        <div class="dash-title">Aandachtspunten</div>
+        <div class="dash-sub">voor aankomende periode</div>
+      </button>
     </div>
+
+    ${mijnOpen.length > 0 ? `
+    <p class="section-label">Jouw openstaande taken</p>
+    ${mijnOpen.slice(0,3).map(t=>`
+      <div class="task-preview">
+        <div class="dot"></div>
+        <span class="task-preview-text">${esc(t.tekst)}</span>
+      </div>`).join('')}
+    ${mijnOpen.length > 3 ? `<button class="more-link" data-goto="taken">+${mijnOpen.length-3} meer bekijken →</button>` : ''}
+    ` : ''}
+  </div>`;
+
+  el.querySelectorAll('[data-goto]').forEach(btn =>
+    btn.addEventListener('click', () => { state.tab = btn.dataset.goto; render(); })
   );
 }
 
-// ─── Boodschappenlijst scherm ─────────────────────────────────────────────────
-function BoodschappenScreen({ user, boodschappen, setBoodschappen }) {
-  const [tekst, setTekst] = useState('');
-  const [hoeveelheid, setHoeveelheid] = useState('');
-  const [toonVoltooid, setToonVoltooid] = useState(false);
+// ── Taken ────────────────────────────────────────────────────────────────────
+function renderTaken(el) {
+  const gefilterd = state.taken.filter(t =>
+    state.takenFilter === 'open' ? !t.voltooid :
+    state.takenFilter === 'voltooid' ? t.voltooid : true
+  );
 
-  const voegToe = () => {
-    if (!tekst.trim()) return;
-    const nieuw = {
-      id: uid(),
-      naam: tekst.trim(),
-      hoeveelheid: hoeveelheid.trim(),
-      afgevinkt: false,
-      toegevoegdDoor: user,
-      aangemaakt: new Date().toISOString()
-    };
-    const updated = [nieuw, ...boodschappen];
-    setBoodschappen(updated);
-    store.set('boodschappen', updated);
-    setTekst('');
-    setHoeveelheid('');
-  };
-
-  const toggleAfgevinkt = (id) => {
-    const updated = boodschappen.map(b => b.id === id ? { ...b, afgevinkt: !b.afgevinkt } : b);
-    setBoodschappen(updated);
-    store.set('boodschappen', updated);
-  };
-
-  const verwijder = (id) => {
-    const updated = boodschappen.filter(b => b.id !== id);
-    setBoodschappen(updated);
-    store.set('boodschappen', updated);
-  };
-
-  const verwijderAfgevinkt = () => {
-    const updated = boodschappen.filter(b => !b.afgevinkt);
-    setBoodschappen(updated);
-    store.set('boodschappen', updated);
-  };
-
-  const openItems = boodschappen.filter(b => !b.afgevinkt);
-  const afgevinktItems = boodschappen.filter(b => b.afgevinkt);
-
-  return (
-    <div className="p-4 fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Boodschappen</h1>
-        <span className="text-sm text-gray-400">{openItems.length} open</span>
-      </div>
-
-      {/* Toevoegen */}
-      <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            placeholder="Product toevoegen..."
-            value={tekst}
-            onChange={e => setTekst(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && voegToe()}
-            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:border-orange-400 focus:ring-2 focus:ring-orange-50"
-          />
-          <input
-            type="text"
-            placeholder="Hoeveel?"
-            value={hoeveelheid}
-            onChange={e => setHoeveelheid(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && voegToe()}
-            className="w-24 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:border-orange-400 focus:ring-2 focus:ring-orange-50"
-          />
-        </div>
-        <button
-          onClick={voegToe}
-          className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-        >
-          <Icon name="plus" size={16} />
-          Toevoegen
-        </button>
-      </div>
-
-      {/* Open items */}
-      {openItems.length === 0 && afgevinktItems.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <Icon name="cart" size={40} className="flex justify-center mb-3 opacity-30" />
-          <p className="text-sm">Boodschappenlijst is leeg.</p>
-          <p className="text-xs mt-1">Voeg hierboven een product toe.</p>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-2">
-            {openItems.map(b => (
-              <div key={b.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3">
-                <button
-                  onClick={() => toggleAfgevinkt(b.id)}
-                  className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0 flex items-center justify-center hover:border-orange-400 transition-colors"
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm text-gray-800">{b.naam}</span>
-                  {b.hoeveelheid && <span className="text-xs text-orange-600 ml-2 font-medium">{b.hoeveelheid}</span>}
-                </div>
-                <span className="text-xs text-gray-300">{b.toegevoegdDoor}</span>
-                <button onClick={() => verwijder(b.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
-                  <Icon name="trash" size={15} />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Afgevinkte items */}
-          {afgevinktItems.length > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <button onClick={() => setToonVoltooid(!toonVoltooid)} className="text-xs text-gray-400 font-medium">
-                  {toonVoltooid ? '▲' : '▶'} Afgevinkt ({afgevinktItems.length})
-                </button>
-                <button onClick={verwijderAfgevinkt} className="text-xs text-red-400 font-medium">
-                  Verwijder afgevinkt
-                </button>
-              </div>
-              {toonVoltooid && (
-                <div className="space-y-2">
-                  {afgevinktItems.map(b => (
-                    <div key={b.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 opacity-50">
-                      <button
-                        onClick={() => toggleAfgevinkt(b.id)}
-                        className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex-shrink-0 flex items-center justify-center text-white"
-                      >
-                        <Icon name="check" size={12} />
-                      </button>
-                      <span className="text-sm text-gray-400 line-through flex-1">{b.naam}{b.hoeveelheid ? ` — ${b.hoeveelheid}` : ''}</span>
-                      <button onClick={() => verwijder(b.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
-                        <Icon name="trash" size={15} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
+  el.innerHTML = `<div class="page">
+    <div class="page-header">
+      <div><div class="page-title">Taken</div></div>
+      <button class="fab blue" id="taak-add-btn">${icon.plus}</button>
     </div>
-  );
-}
 
-// ─── Aandachtspunten scherm ───────────────────────────────────────────────────
-function AandachtspuntenScreen({ user, aandachtspunten, setAandachtspunten }) {
-  const [tekst, setTekst] = useState('');
-  const [beschrijving, setBeschrijving] = useState('');
-  const [toonForm, setToonForm] = useState(false);
-  const [toonAfgevinkt, setToonAfgevinkt] = useState(false);
-
-  const voegToe = () => {
-    if (!tekst.trim()) return;
-    const nieuw = {
-      id: uid(),
-      titel: tekst.trim(),
-      beschrijving: beschrijving.trim(),
-      afgevinkt: false,
-      toegevoegdDoor: user,
-      aangemaakt: new Date().toISOString()
-    };
-    const updated = [nieuw, ...aandachtspunten];
-    setAandachtspunten(updated);
-    store.set('aandachtspunten', updated);
-    setTekst('');
-    setBeschrijving('');
-    setToonForm(false);
-  };
-
-  const toggleAfgevinkt = (id) => {
-    const updated = aandachtspunten.map(a => a.id === id ? { ...a, afgevinkt: !a.afgevinkt, afgevinktOp: !a.afgevinkt ? new Date().toISOString() : null } : a);
-    setAandachtspunten(updated);
-    store.set('aandachtspunten', updated);
-  };
-
-  const verwijder = (id) => {
-    const updated = aandachtspunten.filter(a => a.id !== id);
-    setAandachtspunten(updated);
-    store.set('aandachtspunten', updated);
-  };
-
-  const openItems = aandachtspunten.filter(a => !a.afgevinkt);
-  const afgevinktItems = aandachtspunten.filter(a => a.afgevinkt);
-
-  return (
-    <div className="p-4 fade-in">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Aandachtspunten</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Aankomende periode</p>
+    ${state.takenForm ? `
+    <div class="form-card">
+      <div class="form-label">Nieuwe taak</div>
+      <textarea id="taak-tekst" class="input" rows="2" placeholder="Omschrijving van de taak...">${esc(state.takenTekst)}</textarea>
+      <div class="assign-row" style="margin-top:8px">
+        <span class="assign-label">Voor:</span>
+        <div class="assign-btns">
+          <button class="assign-btn ${state.takenVoor==='Nick'?'selected':''}" data-voor="Nick">Nick</button>
+          <button class="assign-btn ${state.takenVoor==='Assistent'?'selected':''}" data-voor="Assistent">Assistent</button>
         </div>
-        <button
-          onClick={() => setToonForm(!toonForm)}
-          className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-md active:scale-95 transition-transform"
-        >
-          <Icon name="plus" size={18} />
-        </button>
       </div>
-
-      {/* Toevoeg formulier */}
-      {toonForm && (
-        <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-purple-100 fade-in">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Nieuw aandachtspunt</p>
-          <input
-            type="text"
-            placeholder="Aandachtspunt..."
-            value={tekst}
-            onChange={e => setTekst(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-2 focus:border-purple-400 focus:ring-2 focus:ring-purple-50"
-          />
-          <textarea
-            placeholder="Extra toelichting (optioneel)..."
-            value={beschrijving}
-            onChange={e => setBeschrijving(e.target.value)}
-            rows={2}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 mb-3 resize-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50"
-          />
-          <div className="flex gap-2">
-            <button onClick={() => { setToonForm(false); setTekst(''); setBeschrijving(''); }} className="flex-1 py-2 rounded-xl text-sm text-gray-500 bg-gray-100">Annuleer</button>
-            <button onClick={voegToe} className="flex-1 py-2 rounded-xl text-sm text-white font-semibold bg-purple-600 active:bg-purple-700">Toevoegen</button>
-          </div>
-        </div>
-      )}
-
-      {openItems.length === 0 && afgevinktItems.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <Icon name="flag" size={40} className="flex justify-center mb-3 opacity-30" />
-          <p className="text-sm">Geen aandachtspunten.</p>
-          <p className="text-xs mt-1">Klik op + om een aandachtspunt toe te voegen.</p>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-3">
-            {openItems.map(a => (
-              <div key={a.id} className="bg-white rounded-2xl p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <button
-                    onClick={() => toggleAfgevinkt(a.id)}
-                    className="w-6 h-6 rounded-full border-2 border-purple-300 flex-shrink-0 flex items-center justify-center mt-0.5 hover:border-purple-500 transition-colors"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800">{a.titel}</p>
-                    {a.beschrijving && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{a.beschrijving}</p>}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded-full">{a.toegevoegdDoor}</span>
-                      <span className="text-xs text-gray-300">{formatDatum(a.aangemaakt)}</span>
-                    </div>
-                  </div>
-                  <button onClick={() => verwijder(a.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
-                    <Icon name="trash" size={15} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {afgevinktItems.length > 0 && (
-            <div className="mt-4">
-              <button onClick={() => setToonAfgevinkt(!toonAfgevinkt)} className="text-xs text-gray-400 font-medium mb-2 block">
-                {toonAfgevinkt ? '▲' : '▶'} Afgehandeld ({afgevinktItems.length})
-              </button>
-              {toonAfgevinkt && (
-                <div className="space-y-2">
-                  {afgevinktItems.map(a => (
-                    <div key={a.id} className="bg-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3 opacity-50">
-                      <button onClick={() => toggleAfgevinkt(a.id)} className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex-shrink-0 flex items-center justify-center text-white">
-                        <Icon name="check" size={12} />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-400 line-through">{a.titel}</p>
-                      </div>
-                      <button onClick={() => verwijder(a.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1">
-                        <Icon name="trash" size={15} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─── Navigatie balk ────────────────────────────────────────────────────────────
-function NavBar({ actief, navigeer, telTaken, telBoodschappen, telAandachtspunten }) {
-  const tabs = [
-    { id: 'home', icon: 'home', label: 'Home', tel: 0 },
-    { id: 'taken', icon: 'tasks', label: 'Taken', tel: telTaken },
-    { id: 'boodschappen', icon: 'cart', label: 'Boodschappen', tel: telBoodschappen },
-    { id: 'aandachtspunten', icon: 'flag', label: 'Aandacht', tel: telAandachtspunten },
-  ];
-
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom shadow-lg">
-      <div className="max-w-lg mx-auto flex">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => navigeer(tab.id)}
-            className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 relative transition-colors ${actief === tab.id ? 'text-blue-600' : 'text-gray-400'}`}
-          >
-            {tab.tel > 0 && (
-              <span className="absolute top-1.5 right-1/4 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
-                {tab.tel > 9 ? '9+' : tab.tel}
-              </span>
-            )}
-            <Icon name={tab.icon} size={20} />
-            <span className="text-[10px] font-medium">{tab.label}</span>
-            {actief === tab.id && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />}
-          </button>
-        ))}
+      <div class="form-actions">
+        <button class="btn-cancel" id="taak-cancel">Annuleer</button>
+        <button class="btn-save blue" id="taak-save">Toevoegen</button>
       </div>
-    </nav>
-  );
-}
+    </div>` : ''}
 
-// ─── Hoofd App ─────────────────────────────────────────────────────────────────
-function App() {
-  const [user, setUser] = useState(() => store.get('user', null));
-  const [actieveTab, setActieveTab] = useState('home');
-  const [taken, setTaken] = useState(() => store.get('taken', []));
-  const [boodschappen, setBoodschappen] = useState(() => store.get('boodschappen', []));
-  const [aandachtspunten, setAandachtspunten] = useState(() => store.get('aandachtspunten', []));
-
-  const handleLogin = (naam) => {
-    store.set('user', naam);
-    setUser(naam);
-  };
-
-  const handleLogout = () => {
-    store.set('user', null);
-    setUser(null);
-    setActieveTab('home');
-  };
-
-  if (!user) return <LoginScreen onLogin={handleLogin} />;
-
-  const openTaken = taken.filter(t => !t.voltooid && t.toegewezenAan === user).length;
-  const openBoodschappen = boodschappen.filter(b => !b.afgevinkt).length;
-  const openAandachtspunten = aandachtspunten.filter(a => !a.afgevinkt).length;
-
-  return (
-    <div className="min-h-screen bg-gray-50 max-w-lg mx-auto">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-black text-xs">W7</span>
-          </div>
-          <span className="font-bold text-gray-800 text-sm">Washin7</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-gray-500">
-            <Icon name="user" size={15} />
-            <span className="text-sm font-medium">{user}</span>
-          </div>
-          <button onClick={handleLogout} className="text-gray-400 hover:text-gray-600 transition-colors" title="Uitloggen">
-            <Icon name="logout" size={16} />
-          </button>
-        </div>
-      </header>
-
-      {/* Scherm inhoud */}
-      <main className="pb-24">
-        {actieveTab === 'home' && (
-          <Dashboard
-            user={user}
-            taken={taken}
-            boodschappen={boodschappen}
-            aandachtspunten={aandachtspunten}
-            navigeer={setActieveTab}
-          />
-        )}
-        {actieveTab === 'taken' && (
-          <TakenScreen user={user} taken={taken} setTaken={setTaken} />
-        )}
-        {actieveTab === 'boodschappen' && (
-          <BoodschappenScreen user={user} boodschappen={boodschappen} setBoodschappen={setBoodschappen} />
-        )}
-        {actieveTab === 'aandachtspunten' && (
-          <AandachtspuntenScreen user={user} aandachtspunten={aandachtspunten} setAandachtspunten={setAandachtspunten} />
-        )}
-      </main>
-
-      {/* Navigatie */}
-      <NavBar
-        actief={actieveTab}
-        navigeer={setActieveTab}
-        telTaken={openTaken}
-        telBoodschappen={openBoodschappen}
-        telAandachtspunten={openAandachtspunten}
-      />
+    <div class="tabs">
+      <button class="tab ${state.takenFilter==='open'?'active':''}" data-filter="open">Open</button>
+      <button class="tab ${state.takenFilter==='voltooid'?'active':''}" data-filter="voltooid">Voltooid</button>
+      <button class="tab ${state.takenFilter==='alles'?'active':''}" data-filter="alles">Alles</button>
     </div>
+
+    ${gefilterd.length === 0 ? `
+    <div class="empty-state">
+      <p>${state.takenFilter==='open' ? 'Geen openstaande taken!' : 'Geen taken gevonden.'}</p>
+    </div>` : gefilterd.map(t => `
+    <div class="item-row ${t.voltooid?'dimmed':''}">
+      <button class="check-btn ${t.voltooid?'done':'blue-ring'}" data-toggle="${t.id}">
+        ${t.voltooid ? icon.check : ''}
+      </button>
+      <div class="item-body">
+        <div class="item-title ${t.voltooid?'struck':''}">${esc(t.tekst)}</div>
+        <div class="item-meta">
+          <span class="tag blue">${esc(t.voor)}</span>
+          ${t.door !== t.voor ? `<span class="meta-text">van ${esc(t.door)}</span>` : ''}
+          <span class="meta-text">${fmtDate(t.aangemaakt)}</span>
+        </div>
+      </div>
+      <button class="delete-btn" data-del="${t.id}">${icon.trash}</button>
+    </div>`).join('')}
+  </div>`;
+
+  document.getElementById('taak-add-btn').addEventListener('click', () => {
+    state.takenForm = !state.takenForm; renderTaken(el);
+  });
+  if (state.takenForm) {
+    document.getElementById('taak-tekst').addEventListener('input', e => state.takenTekst = e.target.value);
+    document.getElementById('taak-cancel').addEventListener('click', () => {
+      state.takenForm = false; state.takenTekst = ''; renderTaken(el);
+    });
+    document.getElementById('taak-save').addEventListener('click', () => {
+      if (!state.takenTekst.trim()) return;
+      state.taken.unshift({ id: uid(), tekst: state.takenTekst.trim(), voor: state.takenVoor, door: state.user, voltooid: false, aangemaakt: new Date().toISOString() });
+      S.set('taken', state.taken);
+      state.takenTekst = ''; state.takenForm = false;
+      renderTaken(el); renderNav();
+    });
+    el.querySelectorAll('[data-voor]').forEach(btn =>
+      btn.addEventListener('click', () => { state.takenVoor = btn.dataset.voor; renderTaken(el); })
+    );
+  }
+  el.querySelectorAll('[data-filter]').forEach(btn =>
+    btn.addEventListener('click', () => { state.takenFilter = btn.dataset.filter; renderTaken(el); })
+  );
+  el.querySelectorAll('[data-toggle]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const t = state.taken.find(x => x.id === btn.dataset.toggle);
+      if (t) { t.voltooid = !t.voltooid; S.set('taken', state.taken); renderTaken(el); renderNav(); }
+    })
+  );
+  el.querySelectorAll('[data-del]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      state.taken = state.taken.filter(x => x.id !== btn.dataset.del);
+      S.set('taken', state.taken); renderTaken(el); renderNav();
+    })
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// ── Boodschappen ─────────────────────────────────────────────────────────────
+function renderBoodschappen(el) {
+  const open = state.boodschappen.filter(b => !b.afgevinkt);
+  const afgevinkt = state.boodschappen.filter(b => b.afgevinkt);
+
+  el.innerHTML = `<div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Boodschappen</div>
+        <div class="page-subtitle">${open.length} open</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="form-row">
+        <input id="boods-naam" class="input" placeholder="Product toevoegen..." value="${esc(state.boodschappenTekst)}" />
+        <input id="boods-hoeveel" class="input" style="width:90px" placeholder="Hoeveel?" value="${esc(state.boodschappenHoeveel)}" />
+      </div>
+      <button class="btn-save orange" id="boods-save" style="width:100%;padding:10px;border-radius:10px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px">${icon.plus} Toevoegen</button>
+    </div>
+
+    ${open.length === 0 && afgevinkt.length === 0 ? `
+    <div class="empty-state"><p>Boodschappenlijst is leeg.</p><small>Voeg hierboven een product toe.</small></div>
+    ` : `
+    ${open.map(b => `
+    <div class="item-row">
+      <button class="check-btn" data-toggle="${b.id}" style="border-color:#fed7aa" onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='#fed7aa'"></button>
+      <div class="item-body">
+        <span class="item-title">${esc(b.naam)}</span>
+        ${b.hoeveel ? `<span class="tag orange" style="margin-left:8px">${esc(b.hoeveel)}</span>` : ''}
+        <div class="item-meta"><span class="meta-text">${esc(b.door)}</span></div>
+      </div>
+      <button class="delete-btn" data-del="${b.id}">${icon.trash}</button>
+    </div>`).join('')}
+
+    ${afgevinkt.length > 0 ? `
+    <div class="collapse-actions">
+      <button class="collapse-btn" id="toggle-afgevinkt">
+        ${state.boodschappenToonAfgevinkt ? '▲' : '▶'} Afgevinkt (${afgevinkt.length})
+      </button>
+      <button class="del-done-btn" id="del-afgevinkt">Verwijder afgevinkt</button>
+    </div>
+    ${state.boodschappenToonAfgevinkt ? afgevinkt.map(b => `
+    <div class="item-row dimmed">
+      <button class="check-btn done" data-toggle="${b.id}">${icon.check}</button>
+      <div class="item-body">
+        <span class="item-title struck">${esc(b.naam)}${b.hoeveel ? ' — '+esc(b.hoeveel) : ''}</span>
+      </div>
+      <button class="delete-btn" data-del="${b.id}">${icon.trash}</button>
+    </div>`).join('') : ''}
+    ` : ''}
+    `}
+  </div>`;
+
+  document.getElementById('boods-naam').addEventListener('input', e => state.boodschappenTekst = e.target.value);
+  document.getElementById('boods-hoeveel').addEventListener('input', e => state.boodschappenHoeveel = e.target.value);
+  const saveBoods = () => {
+    if (!state.boodschappenTekst.trim()) return;
+    state.boodschappen.unshift({ id: uid(), naam: state.boodschappenTekst.trim(), hoeveel: state.boodschappenHoeveel.trim(), afgevinkt: false, door: state.user, aangemaakt: new Date().toISOString() });
+    S.set('boodschappen', state.boodschappen);
+    state.boodschappenTekst = ''; state.boodschappenHoeveel = '';
+    renderBoodschappen(el); renderNav();
+  };
+  document.getElementById('boods-save').addEventListener('click', saveBoods);
+  document.getElementById('boods-naam').addEventListener('keydown', e => e.key === 'Enter' && saveBoods());
+
+  const togBtn = document.getElementById('toggle-afgevinkt');
+  if (togBtn) togBtn.addEventListener('click', () => { state.boodschappenToonAfgevinkt = !state.boodschappenToonAfgevinkt; renderBoodschappen(el); });
+  const delAfg = document.getElementById('del-afgevinkt');
+  if (delAfg) delAfg.addEventListener('click', () => { state.boodschappen = state.boodschappen.filter(b => !b.afgevinkt); S.set('boodschappen', state.boodschappen); renderBoodschappen(el); renderNav(); });
+
+  el.querySelectorAll('[data-toggle]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const b = state.boodschappen.find(x => x.id === btn.dataset.toggle);
+      if (b) { b.afgevinkt = !b.afgevinkt; S.set('boodschappen', state.boodschappen); renderBoodschappen(el); renderNav(); }
+    })
+  );
+  el.querySelectorAll('[data-del]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      state.boodschappen = state.boodschappen.filter(x => x.id !== btn.dataset.del);
+      S.set('boodschappen', state.boodschappen); renderBoodschappen(el); renderNav();
+    })
+  );
+}
+
+// ── Aandachtspunten ───────────────────────────────────────────────────────────
+function renderAandachtspunten(el) {
+  const open = state.aandachtspunten.filter(a => !a.afgevinkt);
+  const afgevinkt = state.aandachtspunten.filter(a => a.afgevinkt);
+
+  el.innerHTML = `<div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Aandachtspunten</div>
+        <div class="page-subtitle">Aankomende periode</div>
+      </div>
+      <button class="fab purple" id="aand-add-btn">${icon.plus}</button>
+    </div>
+
+    ${state.aandachtForm ? `
+    <div class="form-card" style="border-color:#f3e8ff">
+      <div class="form-label">Nieuw aandachtspunt</div>
+      <input id="aand-titel" class="input" placeholder="Aandachtspunt..." value="${esc(state.aandachtTekst)}" style="margin-bottom:8px"/>
+      <textarea id="aand-beschrijving" class="input" rows="2" placeholder="Extra toelichting (optioneel)...">${esc(state.aandachtBeschrijving)}</textarea>
+      <div class="form-actions">
+        <button class="btn-cancel" id="aand-cancel">Annuleer</button>
+        <button class="btn-save purple" id="aand-save">Toevoegen</button>
+      </div>
+    </div>` : ''}
+
+    ${open.length === 0 && afgevinkt.length === 0 ? `
+    <div class="empty-state"><p>Geen aandachtspunten.</p><small>Klik op + om toe te voegen.</small></div>
+    ` : `
+    ${open.map(a => `
+    <div class="item-row">
+      <button class="check-btn purple-ring" data-toggle="${a.id}"></button>
+      <div class="item-body">
+        <div class="item-title" style="font-weight:600">${esc(a.titel)}</div>
+        ${a.beschrijving ? `<div class="meta-text" style="margin-top:3px;line-height:1.4">${esc(a.beschrijving)}</div>` : ''}
+        <div class="item-meta">
+          <span class="tag purple">${esc(a.door)}</span>
+          <span class="meta-text">${fmtDate(a.aangemaakt)}</span>
+        </div>
+      </div>
+      <button class="delete-btn" data-del="${a.id}">${icon.trash}</button>
+    </div>`).join('')}
+
+    ${afgevinkt.length > 0 ? `
+    <div class="collapse-actions">
+      <button class="collapse-btn" id="toggle-afgehandeld">
+        ${state.aandachtToonAfgevinkt ? '▲' : '▶'} Afgehandeld (${afgevinkt.length})
+      </button>
+    </div>
+    ${state.aandachtToonAfgevinkt ? afgevinkt.map(a => `
+    <div class="item-row dimmed">
+      <button class="check-btn done" data-toggle="${a.id}">${icon.check}</button>
+      <div class="item-body"><div class="item-title struck">${esc(a.titel)}</div></div>
+      <button class="delete-btn" data-del="${a.id}">${icon.trash}</button>
+    </div>`).join('') : ''}
+    ` : ''}
+    `}
+  </div>`;
+
+  document.getElementById('aand-add-btn').addEventListener('click', () => {
+    state.aandachtForm = !state.aandachtForm; renderAandachtspunten(el);
+  });
+  if (state.aandachtForm) {
+    document.getElementById('aand-titel').addEventListener('input', e => state.aandachtTekst = e.target.value);
+    document.getElementById('aand-beschrijving').addEventListener('input', e => state.aandachtBeschrijving = e.target.value);
+    document.getElementById('aand-cancel').addEventListener('click', () => {
+      state.aandachtForm = false; state.aandachtTekst = ''; state.aandachtBeschrijving = ''; renderAandachtspunten(el);
+    });
+    document.getElementById('aand-save').addEventListener('click', () => {
+      if (!state.aandachtTekst.trim()) return;
+      state.aandachtspunten.unshift({ id: uid(), titel: state.aandachtTekst.trim(), beschrijving: state.aandachtBeschrijving.trim(), afgevinkt: false, door: state.user, aangemaakt: new Date().toISOString() });
+      S.set('aandachtspunten', state.aandachtspunten);
+      state.aandachtTekst = ''; state.aandachtBeschrijving = ''; state.aandachtForm = false;
+      renderAandachtspunten(el); renderNav();
+    });
+  }
+  const togAfg = document.getElementById('toggle-afgehandeld');
+  if (togAfg) togAfg.addEventListener('click', () => { state.aandachtToonAfgevinkt = !state.aandachtToonAfgevinkt; renderAandachtspunten(el); });
+  el.querySelectorAll('[data-toggle]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const a = state.aandachtspunten.find(x => x.id === btn.dataset.toggle);
+      if (a) { a.afgevinkt = !a.afgevinkt; S.set('aandachtspunten', state.aandachtspunten); renderAandachtspunten(el); renderNav(); }
+    })
+  );
+  el.querySelectorAll('[data-del]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      state.aandachtspunten = state.aandachtspunten.filter(x => x.id !== btn.dataset.del);
+      S.set('aandachtspunten', state.aandachtspunten); renderAandachtspunten(el); renderNav();
+    })
+  );
+}
+
+// ── Update nav badges without full re-render ─────────────────────────────────
+function renderNav() {
+  const navEl = document.querySelector('.nav-inner');
+  if (!navEl) return;
+  const openTaken = state.taken.filter(t => !t.voltooid && t.voor === state.user).length;
+  const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
+  const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
+  const badge = (btn, n) => {
+    let b = btn.querySelector('.nav-badge');
+    if (n > 0) {
+      if (!b) { b = document.createElement('span'); b.className='nav-badge'; btn.prepend(b); }
+      b.textContent = n > 9 ? '9+' : n;
+    } else if (b) b.remove();
+  };
+  const btns = navEl.querySelectorAll('[data-tab]');
+  btns.forEach(btn => {
+    if (btn.dataset.tab === 'taken') badge(btn, openTaken);
+    else if (btn.dataset.tab === 'boodschappen') badge(btn, openBoodschappen);
+    else if (btn.dataset.tab === 'aandachtspunten') badge(btn, openAandachtspunten);
+  });
+}
+
+// ── XSS escape ───────────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+render();
 </script>
 </body>
 </html>
