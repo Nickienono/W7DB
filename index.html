@@ -42,6 +42,7 @@ main{padding-bottom:80px}
 .login-user-btn:hover{background:#dbeafe;border-color:#bfdbfe}
 .login-user-btn:active{background:#bfdbfe}
 .login-avatar{width:36px;height:36px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.login-role{font-size:11px;color:#64748b;font-weight:500;margin-top:2px}
 .divider{display:flex;align-items:center;gap:8px;margin:14px 0;color:#94a3b8;font-size:12px}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f0}
 .login-custom{display:flex;gap:8px}
@@ -213,10 +214,18 @@ function renderLogin() {
     <div class="login-card">
       <p class="login-label">Wie ben jij?</p>
       <button class="login-user-btn" data-name="Nick">
-        <div class="login-avatar">N</div> Nick
+        <div class="login-avatar">N</div>
+        <div>
+          <div>Nick</div>
+          <div class="login-role">Bedrijfsleider</div>
+        </div>
       </button>
       <button class="login-user-btn" data-name="Assistent">
-        <div class="login-avatar">A</div> Assistent
+        <div class="login-avatar">T</div>
+        <div>
+          <div>Tom</div>
+          <div class="login-role">Assistent bedrijfsleider</div>
+        </div>
       </button>
       <div class="divider">of vul zelf in</div>
       <div class="login-custom">
