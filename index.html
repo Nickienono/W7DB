@@ -246,13 +246,65 @@ function renderLogin() {
   );
 }
 
-function doLogin(naam) {
-  naam = naam.trim();
+
+// ── Supabase sync ───────────────────────────────────────────────
+var SBURL = "https://eobsxmbwkcmckfzpzshr.supabase.co";
+var SBKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvYnN4bWJ3a2NtY2tmenB6c2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDcxNDcsImV4cCI6MjA5Nzc4MzE0N30.kUnVZgjeNm4zMeYUNqhKJoDKeCm3K63qphK6INWJJxE";
+
+async function sbLoad(tabel) {
+  try {
+    var r = await fetch(SBURL + "/rest/v1/" + tabel + "?order=aangemaakt.asc", {
+      headers: { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY }
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+async function sbSync(tabel, arr) {
+  try {
+    var h = { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY, "Content-Type": "application/json" };
+    if (arr.length > 0) {
+      await fetch(SBURL + "/rest/v1/" + tabel, {
+        method: "POST",
+        headers: Object.assign({}, h, { "Prefer": "resolution=merge-duplicates" }),
+        body: JSON.stringify(arr)
+      });
+      var ids = arr.map(function(i){ return i.id; }).join(",");
+      await fetch(SBURL + "/rest/v1/" + tabel + "?id=not.in.(" + ids + ")", {
+        method: "DELETE", headers: h
+      });
+    } else {
+      await fetch(SBURL + "/rest/v1/" + tabel + "?id=neq.null", {
+        method: "DELETE", headers: h
+      });
+    }
+  } catch(e) { console.warn("sbSync fout", e); }
+}
+
+(function() {
+  var _orig = S.set.bind(S);
+  S.set = function(k, v) {
+    _orig(k, v);
+    if (k === "taken" || k === "boodschappen" || k === "aandachtspunten") {
+      sbSync(k, v);
+    }
+  };
+})();
+
+async function doLogin(naam) {
+  naam = (naam||"").trim();
   if (!naam) return;
   state.user = naam;
-  state.takenVoor = naam;
-  S.set('user', naam);
+  S.set("user", naam);
   render();
+  var results = await Promise.all([sbLoad("taken"), sbLoad("boodschappen"), sbLoad("aandachtspunten")]);
+  var t = results[0], b = results[1], a = results[2];
+  var changed = false;
+  if (t && t.length) { state.taken = t; changed = true; }
+  if (b && b.length) { state.boodschappen = b; changed = true; }
+  if (a && a.length) { state.aandachtspunten = a; changed = true; }
+  if (changed) render();
 }
 
 // ── App shell ────────────────────────────────────────────────────────────────
