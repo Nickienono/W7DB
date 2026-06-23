@@ -24,7 +24,7 @@ textarea{resize:none}
 main{padding-bottom:80px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -1px 8px rgba(0,0,0,.06);z-index:100}
 .nav-inner{max-width:480px;margin:0 auto;display:flex}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:2px;background:none;color:#94a3b8;font-size:10px;font-weight:500;position:relative;transition:color .15s}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;gap:2px;background:none;color:#94a3b8;font-size:9px;font-weight:500;position:relative;transition:color .15s}
 .nav-btn.active{color:#2563eb}
 .nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:#2563eb;border-radius:0 0 2px 2px}
 .nav-badge{position:absolute;top:6px;right:calc(50% - 14px);background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -140,6 +140,32 @@ main{padding-bottom:80px}
 .del-done-btn{font-size:12px;color:#ef4444;font-weight:500;background:none}
 
 /* Icons (inline SVG via JS) */
+.cl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cl-naam{font-size:14px;font-weight:600;color:#1e293b}
+.cl-progress{height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin-top:8px}
+.cl-bar{height:100%;background:#16a34a;border-radius:3px;transition:width .3s}
+.cl-meta{font-size:11px;color:#94a3b8;margin-top:5px}
+.cl-back{background:none;color:#2563eb;font-size:13px;font-weight:600;padding:0 0 10px;display:flex;align-items:center;gap:4px;border:none;cursor:pointer}
+.cl-item-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f8fafc}
+.cl-item-row:last-child{border-bottom:none}
+.cl-check{width:22px;height:22px;border-radius:6px;border:2px solid #86efac;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;transition:all .15s;cursor:pointer}
+.cl-check.done{background:#16a34a;border-color:#16a34a}
+.cl-item-tekst{font-size:14px;color:#1e293b;flex:1}
+.cl-item-tekst.done{text-decoration:line-through;color:#94a3b8}
+.fab.green{background:#16a34a}
+.chat-feed{display:flex;flex-direction:column;gap:8px;padding-bottom:56px}
+.chat-mine{align-self:flex-end;max-width:82%}
+.chat-other{align-self:flex-start;max-width:82%}
+.chat-bubble{padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.45}
+.chat-mine .chat-bubble{background:#2563eb;color:#fff;border-bottom-right-radius:4px}
+.chat-other .chat-bubble{background:#fff;color:#1e293b;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.chat-sender{font-size:10px;font-weight:600;color:#64748b;margin-bottom:2px}
+.chat-mine .chat-sender{text-align:right}
+.chat-ts{font-size:10px;color:#94a3b8;margin-top:2px}
+.chat-mine .chat-ts{text-align:right}
+.chat-bar{position:fixed;bottom:56px;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;padding:8px 12px;z-index:99}
+.chat-bar-inner{max-width:480px;margin:0 auto;display:flex;gap:8px}
+.chat-send-btn{background:#2563eb;color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;border:none}
 </style>
 </head>
 <body>
@@ -171,6 +197,9 @@ const icon = {
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>`,
   user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+  checklist: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/><polyline points="14 11 15.5 12.5 18 10"/></svg>`,
+  chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  refresh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
 };
 
 // ── App State ────────────────────────────────────────────────────────────────
@@ -192,6 +221,13 @@ const state = {
   aandachtTekst: '',
   aandachtBeschrijving: '',
   aandachtToonAfgevinkt: false,
+  checklisten: S.get('checklisten', []),
+  berichten: [],
+  checklistForm: false,
+  checklistNaam: '',
+  checklistItemsTekst: '',
+  checklistActief: null,
+  berichtTekst: '',
 };
 
 // ── Render engine ────────────────────────────────────────────────────────────
@@ -286,7 +322,7 @@ async function sbSync(tabel, arr) {
   var _orig = S.set.bind(S);
   S.set = function(k, v) {
     _orig(k, v);
-    if (k === "taken" || k === "boodschappen" || k === "aandachtspunten") {
+    if (k === "taken" || k === "boodschappen" || k === "aandachtspunten" || k === "checklisten") {
       sbSync(k, v);
     }
   };
@@ -298,7 +334,7 @@ async function doLogin(naam) {
   state.user = naam;
   S.set("user", naam);
   render();
-  var results = await Promise.all([sbLoad("taken"), sbLoad("boodschappen"), sbLoad("aandachtspunten")]);
+  var results = await Promise.all([sbLoad("taken"), sbLoad("boodschappen"), sbLoad("aandachtspunten"), sbLoad("checklisten")]);
   var t = results[0], b = results[1], a = results[2];
   var changed = false;
   if (t && t.length) { state.taken = t; changed = true; }
@@ -307,6 +343,9 @@ async function doLogin(naam) {
   else if (state.boodschappen.length > 0) { sbSync("boodschappen", state.boodschappen); }
   if (a && a.length) { state.aandachtspunten = a; changed = true; }
   else if (state.aandachtspunten.length > 0) { sbSync("aandachtspunten", state.aandachtspunten); }
+  var cl4 = results[3];
+  if (cl4 && cl4.length) { state.checklisten = cl4; changed = true; }
+  else if (state.checklisten.length > 0) { sbSync("checklisten", state.checklisten); }
   if (changed) render();
 }
 
@@ -350,7 +389,9 @@ function renderApp() {
   if (state.tab === 'home') renderDashboard(main);
   else if (state.tab === 'taken') renderTaken(main);
   else if (state.tab === 'boodschappen') renderBoodschappen(main);
-  else renderAandachtspunten(main);
+  else if (state.tab === 'aandachtspunten') renderAandachtspunten(main);
+  else if (state.tab === 'checklisten') renderChecklisten(main);
+  else renderBerichten(main);
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
@@ -426,7 +467,7 @@ function renderTaken(el) {
         <span class="assign-label">Voor:</span>
         <div class="assign-btns">
           <button class="assign-btn ${state.takenVoor==='Nick'?'selected':''}" data-voor="Nick">Nick</button>
-          <button class="assign-btn ${state.takenVoor==='Assistent'?'selected':''}" data-voor="Assistent">Assistent</button>
+          <button class="assign-btn ${state.takenVoor==='Assistent'?'selected':''}" data-voor="Assistent">Tom</button>
         </div>
       </div>
       <div class="form-actions">
@@ -452,8 +493,8 @@ function renderTaken(el) {
       <div class="item-body">
         <div class="item-title ${t.voltooid?'struck':''}">${esc(t.tekst)}</div>
         <div class="item-meta">
-          <span class="tag blue">${esc(t.voor)}</span>
-          ${t.door !== t.voor ? `<span class="meta-text">van ${esc(t.door)}</span>` : ''}
+          <span class="tag blue">${esc(displayNaam(t.voor))}</span>
+          ${t.door !== t.voor ? `<span class="meta-text">van ${esc(displayNaam(t.door))}</span>` : ''}
           <span class="meta-text">${fmtDate(t.aangemaakt)}</span>
         </div>
       </div>
@@ -527,7 +568,7 @@ function renderBoodschappen(el) {
       <div class="item-body">
         <span class="item-title">${esc(b.naam)}</span>
         ${b.hoeveel ? `<span class="tag orange" style="margin-left:8px">${esc(b.hoeveel)}</span>` : ''}
-        <div class="item-meta"><span class="meta-text">${esc(b.door)}</span></div>
+        <div class="item-meta"><span class="meta-text">${esc(displayNaam(b.door))}</span></div>
       </div>
       <button class="delete-btn" data-del="${b.id}">${icon.trash}</button>
     </div>`).join('')}
@@ -617,7 +658,7 @@ function renderAandachtspunten(el) {
         <div class="item-title" style="font-weight:600">${esc(a.titel)}</div>
         ${a.beschrijving ? `<div class="meta-text" style="margin-top:3px;line-height:1.4">${esc(a.beschrijving)}</div>` : ''}
         <div class="item-meta">
-          <span class="tag purple">${esc(a.door)}</span>
+          <span class="tag purple">${esc(displayNaam(a.door))}</span>
           <span class="meta-text">${fmtDate(a.aangemaakt)}</span>
         </div>
       </div>
@@ -699,6 +740,162 @@ function renderNav() {
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+
+// ── Display naam helper ──────────────────────────────────────────────────────
+function displayNaam(n) { return n === "Assistent" ? "Tom" : n; }
+
+// ── Supabase insert/update ───────────────────────────────────────────────────
+async function sbInsert(tabel, rij) {
+  try {
+    await fetch(SBURL + "/rest/v1/" + tabel, {
+      method: "POST",
+      headers: { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify(rij)
+    });
+  } catch(e) { console.warn("sbInsert fout", e); }
+}
+async function sbUpdate(tabel, id, velden) {
+  try {
+    await fetch(SBURL + "/rest/v1/" + tabel + "?id=eq." + id, {
+      method: "PATCH",
+      headers: { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify(velden)
+    });
+  } catch(e) { console.warn("sbUpdate fout", e); }
+}
+
+// ── Checklisten ──────────────────────────────────────────────────────────────
+function renderChecklisten(el) {
+  if (state.checklistActief) {
+    var cl = state.checklisten.find(function(c){ return c.id === state.checklistActief; });
+    if (!cl) { state.checklistActief = null; renderChecklisten(el); return; }
+    var items = cl.items || [];
+    var klaar = items.filter(function(i){ return i.afgevinkt; }).length;
+    var pct = items.length > 0 ? Math.round(klaar/items.length*100) : 0;
+    el.innerHTML = '<div class="page">' +
+      '<button class="cl-back" id="cl-terug">← Terug</button>' +
+      '<div class="page-header" style="margin-top:0">' +
+        '<div><div class="page-title">' + esc(cl.naam) + '</div>' +
+        '<div class="page-subtitle">' + klaar + '/' + items.length + ' gedaan</div></div>' +
+        '<button id="cl-reset" style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">Reset</button>' +
+      '</div>' +
+      '<div class="cl-progress" style="margin-bottom:14px"><div class="cl-bar" style="width:' + pct + '%"></div></div>' +
+      (pct===100 ? '<div style="text-align:center;color:#16a34a;font-weight:700;margin-bottom:12px">✓ Checklist voltooid!</div>' : '') +
+      '<div class="card">' +
+        items.map(function(item){
+          return '<div class="cl-item-row">' +
+            '<button class="cl-check ' + (item.afgevinkt?"done":"") + '" data-item="' + item.id + '">' +
+              (item.afgevinkt ? icon.check : '') +
+            '</button>' +
+            '<span class="cl-item-tekst ' + (item.afgevinkt?"done":"") + '">' + esc(item.tekst) + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div></div>';
+    document.getElementById("cl-terug").addEventListener("click", function(){
+      state.checklistActief = null; renderChecklisten(el);
+    });
+    document.getElementById("cl-reset").addEventListener("click", function(){
+      cl.items = cl.items.map(function(i){ return Object.assign({},i,{afgevinkt:false}); });
+      S.set("checklisten", state.checklisten);
+      sbUpdate("checklisten", cl.id, {items: cl.items});
+      renderChecklisten(el);
+    });
+    el.querySelectorAll("[data-item]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var item = cl.items.find(function(i){ return i.id === btn.dataset.item; });
+        if (item) { item.afgevinkt = !item.afgevinkt; S.set("checklisten", state.checklisten); sbUpdate("checklisten", cl.id, {items: cl.items}); renderChecklisten(el); }
+      });
+    });
+    return;
+  }
+  el.innerHTML = '<div class="page">' +
+    '<div class="page-header"><div><div class="page-title">Checklisten</div></div>' +
+    '<button class="fab green" id="cl-add-btn">' + icon.plus + '</button></div>' +
+    (state.checklistForm ?
+      '<div class="form-card" style="border-color:#dcfce7">' +
+        '<div class="form-label">Nieuwe checklist</div>' +
+        '<input id="cl-naam-inp" class="input" placeholder="Naam (bijv. Ochtend opening)" value="' + esc(state.checklistNaam) + '" style="margin-bottom:8px"/>' +
+        '<textarea id="cl-items-inp" class="input" rows="5" placeholder="Items, één per regel...">' + esc(state.checklistItemsTekst) + '</textarea>' +
+        '<div class="form-actions"><button class="btn-cancel" id="cl-cancel">Annuleer</button><button class="btn-save" style="background:#16a34a" id="cl-save">Aanmaken</button></div>' +
+      '</div>' : '') +
+    (state.checklisten.length === 0 && !state.checklistForm ?
+      '<div class="empty-state"><p>Geen checklisten.</p><small>Klik op + om er één aan te maken.</small></div>' :
+      state.checklisten.map(function(c){
+        var its = c.items||[]; var kl = its.filter(function(i){return i.afgevinkt;}).length;
+        var p = its.length>0 ? Math.round(kl/its.length*100) : 0;
+        return '<div class="card" style="cursor:pointer;margin-bottom:10px" data-open="' + c.id + '">' +
+          '<div class="cl-header"><span class="cl-naam">' + esc(c.naam) + '</span>' +
+          '<button class="delete-btn" data-del="' + c.id + '">' + icon.trash + '</button></div>' +
+          '<div class="cl-meta">' + kl + '/' + its.length + ' items afgevinkt</div>' +
+          '<div class="cl-progress"><div class="cl-bar" style="width:' + p + '%"></div></div>' +
+          (p===100 ? '<div style="font-size:11px;color:#16a34a;margin-top:5px;font-weight:600">✓ Voltooid!</div>' : '') +
+        '</div>';
+      }).join('')) +
+  '</div>';
+  document.getElementById("cl-add-btn").addEventListener("click", function(){ state.checklistForm=!state.checklistForm; renderChecklisten(el); });
+  if (state.checklistForm) {
+    document.getElementById("cl-naam-inp").addEventListener("input", function(e){ state.checklistNaam=e.target.value; });
+    document.getElementById("cl-items-inp").addEventListener("input", function(e){ state.checklistItemsTekst=e.target.value; });
+    document.getElementById("cl-cancel").addEventListener("click", function(){ state.checklistForm=false; state.checklistNaam=""; state.checklistItemsTekst=""; renderChecklisten(el); });
+    document.getElementById("cl-save").addEventListener("click", function(){
+      if (!state.checklistNaam.trim()) return;
+      var items = state.checklistItemsTekst.split("\n").filter(function(r){ return r.trim(); }).map(function(r){ return {id:uid(),tekst:r.trim(),afgevinkt:false}; });
+      var nieuw = {id:uid(), naam:state.checklistNaam.trim(), items:items, aangemaakt:new Date().toISOString()};
+      state.checklisten.unshift(nieuw);
+      S.set("checklisten", state.checklisten);
+      state.checklistForm=false; state.checklistNaam=""; state.checklistItemsTekst="";
+      renderChecklisten(el);
+    });
+  }
+  el.querySelectorAll("[data-open]").forEach(function(card){
+    card.addEventListener("click", function(e){ if(!e.target.closest("[data-del]")){ state.checklistActief=card.dataset.open; renderChecklisten(el); } });
+  });
+  el.querySelectorAll("[data-del]").forEach(function(btn){
+    btn.addEventListener("click", function(e){ e.stopPropagation(); state.checklisten=state.checklisten.filter(function(c){ return c.id!==btn.dataset.del; }); S.set("checklisten",state.checklisten); renderChecklisten(el); });
+  });
+}
+
+// ── Berichten ────────────────────────────────────────────────────────────────
+function renderBerichten(el) {
+  if (window._chatTimer) clearInterval(window._chatTimer);
+  function teken() {
+    el.innerHTML = '<div class="page" style="padding-bottom:0">' +
+      '<div class="page-header"><div class="page-title">Chat</div>' +
+      '<button id="chat-ververs" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px">' + icon.refresh + '</button></div>' +
+      '<div class="chat-feed" id="chat-feed">' +
+      (state.berichten.length===0 ? '<div class="empty-state"><p>Nog geen berichten.</p><small>Stuur het eerste bericht!</small></div>' :
+        state.berichten.map(function(b){
+          var mine = b.door===state.user;
+          return '<div class="' + (mine?"chat-mine":"chat-other") + '">' +
+            '<div class="chat-sender">' + esc(displayNaam(b.door)) + '</div>' +
+            '<div class="chat-bubble">' + esc(b.tekst) + '</div>' +
+            '<div class="chat-ts">' + fmtDate(b.aangemaakt) + '</div></div>';
+        }).join("")) +
+      '</div></div>' +
+      '<div class="chat-bar"><div class="chat-bar-inner">' +
+      '<input id="chat-inp" class="input" placeholder="Typ een bericht..." value="' + esc(state.berichtTekst) + '"/>' +
+      '<button class="chat-send-btn" id="chat-zend">Stuur</button></div></div>';
+    setTimeout(function(){ var f=document.getElementById("chat-feed"); if(f) f.scrollTop=f.scrollHeight; },30);
+    document.getElementById("chat-inp").addEventListener("input", function(e){ state.berichtTekst=e.target.value; });
+    var stuur = function(){
+      var tekst = state.berichtTekst.trim(); if (!tekst) return;
+      var msg = {id:uid(), tekst:tekst, door:state.user, aangemaakt:new Date().toISOString()};
+      state.berichten.push(msg); state.berichtTekst=""; teken();
+      sbInsert("berichten", msg);
+    };
+    document.getElementById("chat-zend").addEventListener("click", stuur);
+    document.getElementById("chat-inp").addEventListener("keydown", function(e){ if(e.key==="Enter") stuur(); });
+    document.getElementById("chat-ververs").addEventListener("click", function(){
+      sbLoad("berichten").then(function(d){ if(d){state.berichten=d; teken();} });
+    });
+  }
+  sbLoad("berichten").then(function(d){ if(d){state.berichten=d; teken();} });
+  teken();
+  window._chatTimer = setInterval(function(){
+    if(state.tab==="berichten") sbLoad("berichten").then(function(d){ if(d&&d.length!==state.berichten.length){state.berichten=d; teken();} });
+  }, 20000);
 }
 
 // ── Start ────────────────────────────────────────────────────────────────────
