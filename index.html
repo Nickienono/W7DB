@@ -24,7 +24,7 @@ textarea{resize:none}
 main{padding-bottom:80px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -1px 8px rgba(0,0,0,.06);z-index:100}
 .nav-inner{max-width:480px;margin:0 auto;display:flex}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;gap:2px;background:none;color:#94a3b8;font-size:9px;font-weight:500;position:relative;transition:color .15s}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 3px 6px;gap:2px;background:none;color:#94a3b8;font-size:10px;font-weight:500;position:relative;transition:color .15s}
 .nav-btn.active{color:#2563eb}
 .nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:#2563eb;border-radius:0 0 2px 2px}
 .nav-badge{position:absolute;top:6px;right:calc(50% - 14px);background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -166,7 +166,15 @@ main{padding-bottom:80px}
 .chat-bar{position:fixed;bottom:56px;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;padding:8px 12px;z-index:99}
 .chat-bar-inner{max-width:480px;margin:0 auto;display:flex;gap:8px}
 .chat-send-btn{background:#2563eb;color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;flex-shrink:0;cursor:pointer;border:none}
-</style>
+
+      .collapse-actions { display:flex; align-items:center; gap:10px; padding:8px 0 4px; }
+      .collapse-btn { background:none; border:none; color:#64748b; font-size:13px; cursor:pointer; padding:4px 0; }
+      .del-done-btn { background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; margin-left:auto; }
+      .dimmed { opacity:0.55; }
+      .struck { text-decoration:line-through; color:#94a3b8; }
+      .check-btn.blue-ring { width:22px; height:22px; border-radius:50%; border:2px solid #3b82f6; background:none; cursor:pointer; flex-shrink:0; margin-top:2px; }
+      .check-btn.done { width:22px; height:22px; border-radius:50%; border:2px solid #22c55e; background:#22c55e; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-size:11px; }
+      </style>
 </head>
 <body>
 <div id="app"></div>
@@ -213,7 +221,6 @@ const state = {
   takenFilter: 'open',
   takenForm: false,
   takenTekst: '',
-  takenVoor: 'Nick',
   boodschappenTekst: '',
   boodschappenHoeveel: '',
   boodschappenToonAfgevinkt: false,
@@ -221,6 +228,7 @@ const state = {
   aandachtTekst: '',
   aandachtBeschrijving: '',
   aandachtToonAfgevinkt: false,
+  takenToonKlaar: false,
   checklisten: S.get('checklisten', []),
   berichten: [],
   checklistForm: false,
@@ -351,7 +359,7 @@ async function doLogin(naam) {
 
 // ── App shell ────────────────────────────────────────────────────────────────
 function renderApp() {
-  const openTaken = state.taken.filter(t => !t.voltooid && t.voor === state.user).length;
+  const openTaken = state.taken.filter(t => !t.voltooid).length;
   const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
   const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
 
@@ -390,13 +398,12 @@ function renderApp() {
   else if (state.tab === 'taken') renderTaken(main);
   else if (state.tab === 'boodschappen') renderBoodschappen(main);
   else if (state.tab === 'aandachtspunten') renderAandachtspunten(main);
-  else if (state.tab === 'checklisten') renderChecklisten(main);
-  else renderBerichten(main);
+  else renderChecklisten(main);
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 function renderDashboard(el) {
-  const mijnOpen = state.taken.filter(t => !t.voltooid && t.voor === state.user);
+  const mijnOpen = state.taken.filter(t => !t.voltooid);
   const totaalOpen = state.taken.filter(t => !t.voltooid).length;
   const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
   const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
@@ -413,8 +420,8 @@ function renderDashboard(el) {
       <button class="dash-card" data-goto="taken">
         <div class="dash-icon" style="background:#3b82f6">${icon.tasks}</div>
         <span class="dash-count${countClass(mijnOpen.length)}">${mijnOpen.length}</span>
-        <div class="dash-title">Mijn taken</div>
-        <div class="dash-sub">${totaalOpen} totaal open</div>
+        <div class="dash-title">Open taken</div>
+        <div class="dash-sub">${mijnOpen.length} open taken</div>
       </button>
       <button class="dash-card" data-goto="boodschappen">
         <div class="dash-icon" style="background:#f97316">${icon.cart}</div>
@@ -446,96 +453,81 @@ function renderDashboard(el) {
   );
 }
 
-// ── Taken ────────────────────────────────────────────────────────────────────
+// ── Taken ──────────────────────────────────────────────────────────────────
 function renderTaken(el) {
-  const gefilterd = state.taken.filter(t =>
-    state.takenFilter === 'open' ? !t.voltooid :
-    state.takenFilter === 'voltooid' ? t.voltooid : true
-  );
+  var open = state.taken.filter(function(t){ return !t.voltooid; });
+  var klaar = state.taken.filter(function(t){ return t.voltooid; });
 
-  el.innerHTML = `<div class="page">
-    <div class="page-header">
-      <div><div class="page-title">Taken</div></div>
-      <button class="fab blue" id="taak-add-btn">${icon.plus}</button>
-    </div>
+  el.innerHTML = '<div class="page">' +
+    '<div class="page-header">' +
+      '<div><div class="page-title">Taken</div>' +
+      '<div class="page-subtitle">' + open.length + ' open' + (klaar.length > 0 ? ' · ' + klaar.length + ' klaar' : '') + '</div></div>' +
+      '<button class="fab blue" id="taak-add-btn">' + icon.plus + '</button></div>' +
+    (state.takenForm ?
+      '<div class="form-card">' +
+        '<div class="form-label">Nieuwe taak</div>' +
+        '<textarea id="taak-tekst" class="input" rows="2" placeholder="Omschrijving van de taak...">' + esc(state.takenTekst) + '</textarea>' +
+        '<div class="form-actions">' +
+          '<button class="btn-cancel" id="taak-cancel">Annuleer</button>' +
+          '<button class="btn-save blue" id="taak-save">Toevoegen</button>' +
+        '</div></div>' : '') +
+    (open.length === 0 ?
+      '<div class="empty-state"><p>Geen openstaande taken!</p><small>Klik op + om een taak toe te voegen.</small></div>' :
+      open.map(function(t){
+        return '<div class="item-row">' +
+          '<button class="check-btn blue-ring" data-toggle="' + t.id + '"></button>' +
+          '<div class="item-body">' +
+            '<div class="item-title">' + esc(t.tekst) + '</div>' +
+            '<div class="item-meta"><span class="meta-text">Door: ' + esc(displayNaam(t.door)) + '</span><span class="meta-text">' + fmtDate(t.aangemaakt) + '</span></div>' +
+          '</div>' +
+          '<button class="delete-btn" data-del="' + t.id + '">' + icon.trash + '</button>' +
+        '</div>';
+      }).join("")) +
+    (klaar.length > 0 ?
+      '<div class="collapse-actions">' +
+        '<button class="collapse-btn" id="toggle-klaar">' + (state.takenToonKlaar ? "▲" : "▶") + ' Klaar (' + klaar.length + ')</button>' +
+        '<button class="del-done-btn" id="del-klaar">Verwijder afgerond</button>' +
+      '</div>' +
+      (state.takenToonKlaar ? klaar.map(function(t){
+        return '<div class="item-row dimmed">' +
+          '<button class="check-btn done" data-toggle="' + t.id + '">' + icon.check + '</button>' +
+          '<div class="item-body"><div class="item-title struck">' + esc(t.tekst) + '</div>' +
+          '<div class="item-meta"><span class="meta-text">' + esc(displayNaam(t.door)) + '</span></div></div>' +
+          '<button class="delete-btn" data-del="' + t.id + '">' + icon.trash + '</button></div>';
+      }).join("") : "") : "") +
+  '</div>';
 
-    ${state.takenForm ? `
-    <div class="form-card">
-      <div class="form-label">Nieuwe taak</div>
-      <textarea id="taak-tekst" class="input" rows="2" placeholder="Omschrijving van de taak...">${esc(state.takenTekst)}</textarea>
-      <div class="assign-row" style="margin-top:8px">
-        <span class="assign-label">Voor:</span>
-        <div class="assign-btns">
-          <button class="assign-btn ${state.takenVoor==='Nick'?'selected':''}" data-voor="Nick">Nick</button>
-          <button class="assign-btn ${state.takenVoor==='Assistent'?'selected':''}" data-voor="Assistent">Tom</button>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-cancel" id="taak-cancel">Annuleer</button>
-        <button class="btn-save blue" id="taak-save">Toevoegen</button>
-      </div>
-    </div>` : ''}
-
-    <div class="tabs">
-      <button class="tab ${state.takenFilter==='open'?'active':''}" data-filter="open">Open</button>
-      <button class="tab ${state.takenFilter==='voltooid'?'active':''}" data-filter="voltooid">Voltooid</button>
-      <button class="tab ${state.takenFilter==='alles'?'active':''}" data-filter="alles">Alles</button>
-    </div>
-
-    ${gefilterd.length === 0 ? `
-    <div class="empty-state">
-      <p>${state.takenFilter==='open' ? 'Geen openstaande taken!' : 'Geen taken gevonden.'}</p>
-    </div>` : gefilterd.map(t => `
-    <div class="item-row ${t.voltooid?'dimmed':''}">
-      <button class="check-btn ${t.voltooid?'done':'blue-ring'}" data-toggle="${t.id}">
-        ${t.voltooid ? icon.check : ''}
-      </button>
-      <div class="item-body">
-        <div class="item-title ${t.voltooid?'struck':''}">${esc(t.tekst)}</div>
-        <div class="item-meta">
-          <span class="tag blue">${esc(displayNaam(t.voor))}</span>
-          ${t.door !== t.voor ? `<span class="meta-text">van ${esc(displayNaam(t.door))}</span>` : ''}
-          <span class="meta-text">${fmtDate(t.aangemaakt)}</span>
-        </div>
-      </div>
-      <button class="delete-btn" data-del="${t.id}">${icon.trash}</button>
-    </div>`).join('')}
-  </div>`;
-
-  document.getElementById('taak-add-btn').addEventListener('click', () => {
-    state.takenForm = !state.takenForm; renderTaken(el);
-  });
+  document.getElementById("taak-add-btn").addEventListener("click", function(){ state.takenForm = !state.takenForm; renderTaken(el); });
   if (state.takenForm) {
-    document.getElementById('taak-tekst').addEventListener('input', e => state.takenTekst = e.target.value);
-    document.getElementById('taak-cancel').addEventListener('click', () => {
-      state.takenForm = false; state.takenTekst = ''; renderTaken(el);
-    });
-    document.getElementById('taak-save').addEventListener('click', () => {
+    document.getElementById("taak-tekst").addEventListener("input", function(e){ state.takenTekst = e.target.value; });
+    document.getElementById("taak-cancel").addEventListener("click", function(){ state.takenForm = false; state.takenTekst = ""; renderTaken(el); });
+    document.getElementById("taak-save").addEventListener("click", function(){
       if (!state.takenTekst.trim()) return;
-      state.taken.unshift({ id: uid(), tekst: state.takenTekst.trim(), voor: state.takenVoor, door: state.user, voltooid: false, aangemaakt: new Date().toISOString() });
-      S.set('taken', state.taken);
-      state.takenTekst = ''; state.takenForm = false;
+      state.taken.unshift({ id: uid(), tekst: state.takenTekst.trim(), voor: "Beide", door: state.user, voltooid: false, aangemaakt: new Date().toISOString() });
+      S.set("taken", state.taken);
+      state.takenTekst = ""; state.takenForm = false;
       renderTaken(el); renderNav();
     });
-    el.querySelectorAll('[data-voor]').forEach(btn =>
-      btn.addEventListener('click', () => { state.takenVoor = btn.dataset.voor; renderTaken(el); })
-    );
   }
-  el.querySelectorAll('[data-filter]').forEach(btn =>
-    btn.addEventListener('click', () => { state.takenFilter = btn.dataset.filter; renderTaken(el); })
-  );
-  el.querySelectorAll('[data-toggle]').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const t = state.taken.find(x => x.id === btn.dataset.toggle);
-      if (t) { t.voltooid = !t.voltooid; S.set('taken', state.taken); renderTaken(el); renderNav(); }
-    })
-  );
-  el.querySelectorAll('[data-del]').forEach(btn =>
-    btn.addEventListener('click', () => {
-      state.taken = state.taken.filter(x => x.id !== btn.dataset.del);
-      S.set('taken', state.taken); renderTaken(el); renderNav();
-    })
-  );
+  var togKlaar = document.getElementById("toggle-klaar");
+  if (togKlaar) togKlaar.addEventListener("click", function(){ state.takenToonKlaar = !state.takenToonKlaar; renderTaken(el); });
+  var delKlaar = document.getElementById("del-klaar");
+  if (delKlaar) delKlaar.addEventListener("click", function(){
+    state.taken = state.taken.filter(function(t){ return !t.voltooid; });
+    S.set("taken", state.taken); renderTaken(el); renderNav();
+  });
+  el.querySelectorAll("[data-toggle]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var t = state.taken.find(function(x){ return x.id === btn.dataset.toggle; });
+      if (t) { t.voltooid = !t.voltooid; S.set("taken", state.taken); renderTaken(el); renderNav(); }
+    });
+  });
+  el.querySelectorAll("[data-del]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.taken = state.taken.filter(function(x){ return x.id !== btn.dataset.del; });
+      S.set("taken", state.taken); renderTaken(el); renderNav();
+    });
+  });
 }
 
 // ── Boodschappen ─────────────────────────────────────────────────────────────
@@ -718,7 +710,7 @@ function renderAandachtspunten(el) {
 function renderNav() {
   const navEl = document.querySelector('.nav-inner');
   if (!navEl) return;
-  const openTaken = state.taken.filter(t => !t.voltooid && t.voor === state.user).length;
+  const openTaken = state.taken.filter(t => !t.voltooid).length;
   const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
   const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
   const badge = (btn, n) => {
