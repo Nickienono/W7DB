@@ -302,8 +302,11 @@ async function doLogin(naam) {
   var t = results[0], b = results[1], a = results[2];
   var changed = false;
   if (t && t.length) { state.taken = t; changed = true; }
+  else if (state.taken.length > 0) { sbSync("taken", state.taken); }
   if (b && b.length) { state.boodschappen = b; changed = true; }
+  else if (state.boodschappen.length > 0) { sbSync("boodschappen", state.boodschappen); }
   if (a && a.length) { state.aandachtspunten = a; changed = true; }
+  else if (state.aandachtspunten.length > 0) { sbSync("aandachtspunten", state.aandachtspunten); }
   if (changed) render();
 }
 
