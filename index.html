@@ -190,6 +190,14 @@ main{padding-bottom:80px}
       .dash-card.orange { border-top:3px solid #f59e0b; }
       .dash-num { font-size:24px; font-weight:700; color:#1e293b; }
       .dash-title { font-size:11px; color:#64748b; margin-top:2px; }
+      
+      .dash-layout { display:flex; gap:20px; align-items:flex-start; height:100%; }
+      .dash-left { flex:1; min-width:0; }
+      .dash-right { width:310px; flex-shrink:0; background:#fff; border-radius:16px; border:1px solid #e2e8f0; padding:14px; max-height:calc(100vh - 140px); overflow-y:auto; }
+      .plan-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+      .plan-title { font-size:14px; font-weight:700; color:#1e293b; }
+      .plan-sub { font-size:12px; color:#64748b; margin-top:1px; }
+      @media (max-width:640px) { .dash-layout { flex-direction:column; } .dash-right { width:100%; max-height:none; } }
       </style>
 </head>
 <body>
@@ -421,6 +429,22 @@ function renderApp() {
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
+
+function showConfetti() {
+  var cv = document.createElement('canvas');
+  cv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+  document.body.appendChild(cv);
+  var ctx = cv.getContext('2d');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  var cols = ['#3b82f6','#22c55e','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+  var pieces = [];
+  for(var i=0;i<160;i++) pieces.push({ x:Math.random()*cv.width, y:Math.random()*cv.height-cv.height, w:Math.random()*10+5, h:Math.random()*6+3, color:cols[Math.floor(Math.random()*cols.length)], speed:Math.random()*4+2, angle:Math.random()*360, spin:Math.random()*10-5 });
+  var fr;
+  function draw(){ ctx.clearRect(0,0,cv.width,cv.height); var done=true; pieces.forEach(function(p){ if(p.y<cv.height+20) done=false; p.y+=p.speed; p.angle+=p.spin; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }); if(done){if(cv.parentNode)cv.parentNode.removeChild(cv);return;} fr=requestAnimationFrame(draw); }
+  draw();
+  setTimeout(function(){ cancelAnimationFrame(fr); if(cv.parentNode) cv.parentNode.removeChild(cv); }, 4000);
+}
+
 function renderDashboard(el) {
   var week = huidigWeek();
   var jaar = new Date().getFullYear();
@@ -434,38 +458,64 @@ function renderDashboard(el) {
   var openTaken = state.taken.filter(function(t){ return !t.voltooid; }).length;
   var openBood = state.boodschappen.filter(function(b){ return !b.afgevinkt; }).length;
   var openNot = state.aandachtspunten.filter(function(a){ return !a.afgevinkt; }).length;
+  var pct = totaal > 0 ? Math.round(gedaan/totaal*100) : 0;
+  var wasAllesDone = state._weekDone === weekKey;
 
   function planItem(t) {
     var checked = checks.indexOf(t.id) !== -1;
-    return '<div class="plan-item' + (checked ? ' plan-done' : '') + '" data-pid="' + t.id + '">' +
+    return '<div class="plan-item' + (checked ? ' plan-done' : '') + '">' +
       '<button class="check-btn ' + (checked ? 'done' : 'blue-ring') + '" data-ptoggle="' + t.id + '">' + (checked ? icon.check : '') + '</button>' +
       '<span class="plan-naam">' + esc(t.naam) + '</span>' +
       '</div>';
   }
 
-  el.innerHTML = '<div class="page">' +
-    '<div class="page-header"><div>' +
-      '<div class="page-title">Week ' + week + ' — ' + gedaan + '/' + totaal + ' klaar</div>' +
-      '<div class="page-subtitle">Jaarplanning ' + jaar + '</div>' +
+  el.innerHTML = '<div class="dash-layout">' +
+    // Linker kolom: stat cards
+    '<div class="dash-left">' +
+      '<div class="page-header" style="margin-bottom:16px"><div>' +
+        '<div class="page-title">Hallo, ' + esc(displayNaam(state.user)) + '!</div>' +
+        '<div class="page-subtitle">Week ' + week + ' · ' + new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) + '</div>' +
+      '</div></div>' +
+      '<div class="dash-cards">' +
+        '<div class="dash-card blue" data-goto="taken"><div class="dash-num">' + openTaken + '</div><div class="dash-title">Open taken</div></div>' +
+        '<div class="dash-card green" data-goto="boodschappen"><div class="dash-num">' + openBood + '</div><div class="dash-title">Boodschappen</div></div>' +
+        '<div class="dash-card orange" data-goto="aandachtspunten"><div class="dash-num">' + openNot + '</div><div class="dash-title">Notities</div></div>' +
+      '</div>' +
+      (openTaken > 0 ? '<div class="plan-cat-label" style="margin-top:20px">Openstaande taken</div>' +
+        state.taken.filter(function(t){return !t.voltooid;}).slice(0,5).map(function(t){
+          return '<div class="item-row" style="margin-bottom:5px">' +
+            '<button class="check-btn blue-ring" data-toggle="' + t.id + '"></button>' +
+            '<div class="item-body"><div class="item-title">' + esc(t.tekst) + '</div></div>' +
+          '</div>';
+        }).join('') : '<div class="empty-state" style="margin-top:20px"><p>Geen openstaande taken!</p></div>') +
     '</div>' +
-    (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">✓ Week klaar!</div>' : '') +
-    '</div>' +
-    '<div class="plan-progress"><div class="plan-bar" style="width:' + (totaal > 0 ? Math.round(gedaan/totaal*100) : 0) + '%"></div></div>' +
-    '<div class="plan-cat-label">Personeel (' + personeel.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + personeel.length + ')</div>' +
-    personeel.map(planItem).join('') +
-    '<div class="plan-cat-label" style="margin-top:12px">Leiding (' + leiding.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + leiding.length + ')</div>' +
-    leiding.map(planItem).join('') +
-    '<div class="dash-cards" style="margin-top:16px">' +
-      '<div class="dash-card blue" data-goto="taken"><div class="dash-num">' + openTaken + '</div><div class="dash-title">Open taken</div></div>' +
-      '<div class="dash-card green" data-goto="boodschappen"><div class="dash-num">' + openBood + '</div><div class="dash-title">Boodschappen</div></div>' +
-      '<div class="dash-card orange" data-goto="aandachtspunten"><div class="dash-num">' + openNot + '</div><div class="dash-title">Notities</div></div>' +
+    // Rechter kolom: weekplanning
+    '<div class="dash-right">' +
+      '<div class="plan-header">' +
+        '<div>' +
+          '<div class="plan-title">Jaarplanning week ' + week + '</div>' +
+          '<div class="plan-sub">' + gedaan + ' / ' + totaal + ' klaar</div>' +
+        '</div>' +
+        (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">✓ Klaar!</div>' : '') +
+      '</div>' +
+      '<div class="plan-progress"><div class="plan-bar" style="width:' + pct + '%"></div></div>' +
+      '<div class="plan-cat-label">Personeel (' + personeel.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + personeel.length + ')</div>' +
+      personeel.map(planItem).join('') +
+      '<div class="plan-cat-label" style="margin-top:10px">Leiding (' + leiding.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + leiding.length + ')</div>' +
+      leiding.map(planItem).join('') +
     '</div>' +
   '</div>';
+
+  // Confetti als alles net afgerond is
+  if (gedaan === totaal && totaal > 0 && !wasAllesDone) {
+    state._weekDone = weekKey;
+    setTimeout(showConfetti, 200);
+  }
 
   el.querySelectorAll('[data-ptoggle]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var id = btn.dataset.ptoggle;
-      var cur = state.planningChecks[weekKey] ? state.planningChecks[weekKey].slice() : [];
+      var cur = (state.planningChecks[weekKey] || []).slice();
       var idx = cur.indexOf(id);
       if (idx === -1) cur.push(id); else cur.splice(idx, 1);
       state.planningChecks[weekKey] = cur;
@@ -476,57 +526,14 @@ function renderDashboard(el) {
   el.querySelectorAll('[data-goto]').forEach(function(c) {
     c.addEventListener('click', function() { state.tab = c.dataset.goto; render(); });
   });
-}
-
-// ── Jaarplanning data ─────────────────────────────────────────────────────────
-var JAARPLANNING = [
-  {id:'jp01',naam:'Smeren wasstraat',freq:6,start:1,cat:'Personeel'},
-  {id:'jp02',naam:'Smeren aandrijf- en omkeerstation + al het vuil weg',freq:4,start:3,cat:'Personeel'},
-  {id:'jp03',naam:'Vervangen droogdoeken',freq:7,start:2,cat:'Personeel'},
-  {id:'jp04',naam:'Controleren recyle putten + obas',freq:8,start:5,cat:'Personeel'},
-  {id:'jp05',naam:'Schoonmaken nozzles/sproeiers',freq:1,start:1,cat:'Personeel'},
-  {id:'jp06',naam:'Schoonmaken filters (wasboxen, wasstraat, e-kasten, beluchters)',freq:4,start:1,cat:'Personeel'},
-  {id:'jp07',naam:'Checken/schoonmaken chemiepompjes + hydrominors',freq:4,start:3,cat:'Personeel'},
-  {id:'jp08',naam:'Onderhoud ventilatoren drooghok',freq:1,start:1,cat:'Personeel'},
-  {id:'jp09',naam:'Vervangen stofzuigerslangen/monden',freq:8,start:2,cat:'Personeel'},
-  {id:'jp10',naam:'Textiel dakborstels grondig schoonmaken',freq:6,start:1,cat:'Personeel'},
-  {id:'jp11',naam:'Textiel RUW 1 grondig schoonmaken',freq:6,start:4,cat:'Personeel'},
-  {id:'jp12',naam:'Textiel RUW 2 grondig schoonmaken',freq:6,start:6,cat:'Personeel'},
-  {id:'jp13',naam:'Textiel PE 118 grondig schoonmaken',freq:6,start:8,cat:'Personeel'},
-  {id:'jp14',naam:'Textiel PE 135 grondig schoonmaken',freq:6,start:5,cat:'Personeel'},
-  {id:'jp15',naam:'Put legen wasstraat',freq:6,start:2,cat:'Personeel'},
-  {id:'jp16',naam:'Wasboxen schrobben',freq:4,start:1,cat:'Personeel'},
-  {id:'jp17',naam:'RVS wasboxen schoonmaken',freq:4,start:3,cat:'Personeel'},
-  {id:'jp18',naam:'Plein afspuiten',freq:4,start:2,cat:'Personeel'},
-  {id:'jp19',naam:'Prullenbakken uitspuiten',freq:8,start:9,cat:'Personeel'},
-  {id:'jp20',naam:'Onkruid weghalen',freq:8,start:10,cat:'Personeel'},
-  {id:'jp21',naam:'Struiken snoeien',freq:8,start:23,cat:'Personeel'},
-  {id:'jp22',naam:'Kantinekastjes schoonmaken',freq:4,start:4,cat:'Personeel'},
-  {id:'jp23',naam:'Oven schoonmaken',freq:4,start:4,cat:'Personeel'},
-  {id:'jp24',naam:'Koelkast schoonmaken',freq:4,start:2,cat:'Personeel'},
-  {id:'jp25',naam:'WC personeel grondig schoonmaken',freq:2,start:1,cat:'Personeel'},
-  {id:'jp26',naam:'WC klanten grondig schoonmaken',freq:2,start:2,cat:'Personeel'},
-  {id:'jp27',naam:'Statiegeld fles (oranje) legen',freq:6,start:1,cat:'Personeel'},
-  {id:'jl01',naam:'Controleren recyle putten + obas',freq:8,start:1,cat:'Leiding'},
-  {id:'jl02',naam:'Checken oliepotjes',freq:6,start:4,cat:'Leiding'},
-  {id:'jl03',naam:'Chemiemeting invullen Teams',freq:1,start:1,cat:'Leiding'},
-  {id:'jl04',naam:'Kantoor opruimen/schoonmaken',freq:4,start:1,cat:'Leiding'},
-  {id:'jl05',naam:'Wasboxen controleren werking',freq:4,start:3,cat:'Leiding'},
-  {id:'jl06',naam:'Voorraad automaten controleren/bestellen',freq:5,start:8,cat:'Leiding'},
-  {id:'jl07',naam:'Voorraad verkoopproducten (voor BLO)',freq:4,start:2,cat:'Leiding'},
-  {id:'jl08',naam:'Statiegeld inleveren',freq:6,start:5,cat:'Leiding'}
-];
-function huidigWeek() {
-  var start = new Date(new Date().getFullYear(), 0, 1);
-  var days = Math.floor((new Date() - start) / 86400000);
-  return Math.ceil((days + 1) / 7);
-}
-function takenDezeWeek(week) {
-  return JAARPLANNING.filter(function(t) {
-    if (t.freq === 1) return true;
-    var w = t.start; while (w <= 52) { if (w === week) return true; w += t.freq; } return false;
+  el.querySelectorAll('[data-toggle]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var t = state.taken.find(function(x){ return x.id === btn.dataset.toggle; });
+      if (t) { t.voltooid = !t.voltooid; S.set('taken', state.taken); renderDashboard(el); renderNav(); }
+    });
   });
 }
+
 function renderTaken(el) {
   var open = state.taken.filter(function(t){ return !t.voltooid; });
   var klaar = state.taken.filter(function(t){ return t.voltooid; });
