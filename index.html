@@ -382,55 +382,7 @@ function renderApp() {
 
   const badge = n => n > 0 ? `<span class="nav-badge">${n > 9 ? '9+' : n}</span>` : '';
 
-// ── Jaarplanning data ─────────────────────────────────────────────────────────
-var JAARPLANNING = [
-  {id:'jp01',naam:'Smeren wasstraat',freq:6,start:1,cat:'Personeel'},
-  {id:'jp02',naam:'Smeren aandrijf- en omkeerstation + al het vuil weg',freq:4,start:3,cat:'Personeel'},
-  {id:'jp03',naam:'Vervangen droogdoeken',freq:7,start:2,cat:'Personeel'},
-  {id:'jp04',naam:'Controleren recyle putten + obas',freq:8,start:5,cat:'Personeel'},
-  {id:'jp05',naam:'Schoonmaken nozzles/sproeiers',freq:1,start:1,cat:'Personeel'},
-  {id:'jp06',naam:'Schoonmaken filters (wasboxen, wasstraat, e-kasten, beluchters)',freq:4,start:1,cat:'Personeel'},
-  {id:'jp07',naam:'Checken/schoonmaken chemiepompjes + hydrominors',freq:4,start:3,cat:'Personeel'},
-  {id:'jp08',naam:'Onderhoud ventilatoren drooghok',freq:1,start:1,cat:'Personeel'},
-  {id:'jp09',naam:'Vervangen stofzuigerslangen/monden',freq:8,start:2,cat:'Personeel'},
-  {id:'jp10',naam:'Textiel dakborstels grondig schoonmaken',freq:6,start:1,cat:'Personeel'},
-  {id:'jp11',naam:'Textiel RUW 1 grondig schoonmaken',freq:6,start:4,cat:'Personeel'},
-  {id:'jp12',naam:'Textiel RUW 2 grondig schoonmaken',freq:6,start:6,cat:'Personeel'},
-  {id:'jp13',naam:'Textiel PE 118 grondig schoonmaken',freq:6,start:8,cat:'Personeel'},
-  {id:'jp14',naam:'Textiel PE 135 grondig schoonmaken',freq:6,start:5,cat:'Personeel'},
-  {id:'jp15',naam:'Put legen wasstraat',freq:6,start:2,cat:'Personeel'},
-  {id:'jp16',naam:'Wasboxen schrobben',freq:4,start:1,cat:'Personeel'},
-  {id:'jp17',naam:'RVS wasboxen schoonmaken',freq:4,start:3,cat:'Personeel'},
-  {id:'jp18',naam:'Plein afspuiten',freq:4,start:2,cat:'Personeel'},
-  {id:'jp19',naam:'Prullenbakken uitspuiten',freq:8,start:9,cat:'Personeel'},
-  {id:'jp20',naam:'Onkruid weghalen',freq:8,start:10,cat:'Personeel'},
-  {id:'jp21',naam:'Struiken snoeien',freq:8,start:23,cat:'Personeel'},
-  {id:'jp22',naam:'Kantinekastjes schoonmaken',freq:4,start:4,cat:'Personeel'},
-  {id:'jp23',naam:'Oven schoonmaken',freq:4,start:4,cat:'Personeel'},
-  {id:'jp24',naam:'Koelkast schoonmaken',freq:4,start:2,cat:'Personeel'},
-  {id:'jp25',naam:'WC personeel grondig schoonmaken',freq:2,start:1,cat:'Personeel'},
-  {id:'jp26',naam:'WC klanten grondig schoonmaken',freq:2,start:2,cat:'Personeel'},
-  {id:'jp27',naam:'Statiegeld fles (oranje) legen',freq:6,start:1,cat:'Personeel'},
-  {id:'jl01',naam:'Controleren recyle putten + obas',freq:8,start:1,cat:'Leiding'},
-  {id:'jl02',naam:'Checken oliepotjes',freq:6,start:4,cat:'Leiding'},
-  {id:'jl03',naam:'Chemiemeting invullen Teams',freq:1,start:1,cat:'Leiding'},
-  {id:'jl04',naam:'Kantoor opruimen/schoonmaken',freq:4,start:1,cat:'Leiding'},
-  {id:'jl05',naam:'Wasboxen controleren werking',freq:4,start:3,cat:'Leiding'},
-  {id:'jl06',naam:'Voorraad automaten controleren/bestellen',freq:5,start:8,cat:'Leiding'},
-  {id:'jl07',naam:'Voorraad verkoopproducten (voor BLO)',freq:4,start:2,cat:'Leiding'},
-  {id:'jl08',naam:'Statiegeld inleveren',freq:6,start:5,cat:'Leiding'}
-];
-function huidigWeek() {
-  var start = new Date(new Date().getFullYear(), 0, 1);
-  var days = Math.floor((new Date() - start) / 86400000);
-  return Math.ceil((days + 1) / 7);
-}
-function takenDezeWeek(week) {
-  return JAARPLANNING.filter(function(t) {
-    if (t.freq === 1) return true;
-    var w = t.start; while (w <= 52) { if (w === week) return true; w += t.freq; } return false;
-  });
-}
+
 
   app.innerHTML = `
   <div class="header">
@@ -526,6 +478,55 @@ function renderDashboard(el) {
   });
 }
 
+// ── Jaarplanning data ─────────────────────────────────────────────────────────
+var JAARPLANNING = [
+  {id:'jp01',naam:'Smeren wasstraat',freq:6,start:1,cat:'Personeel'},
+  {id:'jp02',naam:'Smeren aandrijf- en omkeerstation + al het vuil weg',freq:4,start:3,cat:'Personeel'},
+  {id:'jp03',naam:'Vervangen droogdoeken',freq:7,start:2,cat:'Personeel'},
+  {id:'jp04',naam:'Controleren recyle putten + obas',freq:8,start:5,cat:'Personeel'},
+  {id:'jp05',naam:'Schoonmaken nozzles/sproeiers',freq:1,start:1,cat:'Personeel'},
+  {id:'jp06',naam:'Schoonmaken filters (wasboxen, wasstraat, e-kasten, beluchters)',freq:4,start:1,cat:'Personeel'},
+  {id:'jp07',naam:'Checken/schoonmaken chemiepompjes + hydrominors',freq:4,start:3,cat:'Personeel'},
+  {id:'jp08',naam:'Onderhoud ventilatoren drooghok',freq:1,start:1,cat:'Personeel'},
+  {id:'jp09',naam:'Vervangen stofzuigerslangen/monden',freq:8,start:2,cat:'Personeel'},
+  {id:'jp10',naam:'Textiel dakborstels grondig schoonmaken',freq:6,start:1,cat:'Personeel'},
+  {id:'jp11',naam:'Textiel RUW 1 grondig schoonmaken',freq:6,start:4,cat:'Personeel'},
+  {id:'jp12',naam:'Textiel RUW 2 grondig schoonmaken',freq:6,start:6,cat:'Personeel'},
+  {id:'jp13',naam:'Textiel PE 118 grondig schoonmaken',freq:6,start:8,cat:'Personeel'},
+  {id:'jp14',naam:'Textiel PE 135 grondig schoonmaken',freq:6,start:5,cat:'Personeel'},
+  {id:'jp15',naam:'Put legen wasstraat',freq:6,start:2,cat:'Personeel'},
+  {id:'jp16',naam:'Wasboxen schrobben',freq:4,start:1,cat:'Personeel'},
+  {id:'jp17',naam:'RVS wasboxen schoonmaken',freq:4,start:3,cat:'Personeel'},
+  {id:'jp18',naam:'Plein afspuiten',freq:4,start:2,cat:'Personeel'},
+  {id:'jp19',naam:'Prullenbakken uitspuiten',freq:8,start:9,cat:'Personeel'},
+  {id:'jp20',naam:'Onkruid weghalen',freq:8,start:10,cat:'Personeel'},
+  {id:'jp21',naam:'Struiken snoeien',freq:8,start:23,cat:'Personeel'},
+  {id:'jp22',naam:'Kantinekastjes schoonmaken',freq:4,start:4,cat:'Personeel'},
+  {id:'jp23',naam:'Oven schoonmaken',freq:4,start:4,cat:'Personeel'},
+  {id:'jp24',naam:'Koelkast schoonmaken',freq:4,start:2,cat:'Personeel'},
+  {id:'jp25',naam:'WC personeel grondig schoonmaken',freq:2,start:1,cat:'Personeel'},
+  {id:'jp26',naam:'WC klanten grondig schoonmaken',freq:2,start:2,cat:'Personeel'},
+  {id:'jp27',naam:'Statiegeld fles (oranje) legen',freq:6,start:1,cat:'Personeel'},
+  {id:'jl01',naam:'Controleren recyle putten + obas',freq:8,start:1,cat:'Leiding'},
+  {id:'jl02',naam:'Checken oliepotjes',freq:6,start:4,cat:'Leiding'},
+  {id:'jl03',naam:'Chemiemeting invullen Teams',freq:1,start:1,cat:'Leiding'},
+  {id:'jl04',naam:'Kantoor opruimen/schoonmaken',freq:4,start:1,cat:'Leiding'},
+  {id:'jl05',naam:'Wasboxen controleren werking',freq:4,start:3,cat:'Leiding'},
+  {id:'jl06',naam:'Voorraad automaten controleren/bestellen',freq:5,start:8,cat:'Leiding'},
+  {id:'jl07',naam:'Voorraad verkoopproducten (voor BLO)',freq:4,start:2,cat:'Leiding'},
+  {id:'jl08',naam:'Statiegeld inleveren',freq:6,start:5,cat:'Leiding'}
+];
+function huidigWeek() {
+  var start = new Date(new Date().getFullYear(), 0, 1);
+  var days = Math.floor((new Date() - start) / 86400000);
+  return Math.ceil((days + 1) / 7);
+}
+function takenDezeWeek(week) {
+  return JAARPLANNING.filter(function(t) {
+    if (t.freq === 1) return true;
+    var w = t.start; while (w <= 52) { if (w === week) return true; w += t.freq; } return false;
+  });
+}
 function renderTaken(el) {
   var open = state.taken.filter(function(t){ return !t.voltooid; });
   var klaar = state.taken.filter(function(t){ return t.voltooid; });
