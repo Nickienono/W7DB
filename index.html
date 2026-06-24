@@ -174,6 +174,22 @@ main{padding-bottom:80px}
       .struck { text-decoration:line-through; color:#94a3b8; }
       .check-btn.blue-ring { width:22px; height:22px; border-radius:50%; border:2px solid #3b82f6; background:none; cursor:pointer; flex-shrink:0; margin-top:2px; }
       .check-btn.done { width:22px; height:22px; border-radius:50%; border:2px solid #22c55e; background:#22c55e; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-size:11px; }
+      
+      .plan-progress { height:6px; background:#e2e8f0; border-radius:3px; margin:10px 0 16px; }
+      .plan-bar { height:6px; background:#3b82f6; border-radius:3px; transition:width .3s; }
+      .plan-cat-label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+      .plan-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#fff; border-radius:10px; margin-bottom:5px; border:1px solid #e2e8f0; }
+      .plan-item.plan-done { background:#f0fdf4; border-color:#bbf7d0; }
+      .plan-naam { font-size:13px; color:#1e293b; flex:1; }
+      .plan-item.plan-done .plan-naam { text-decoration:line-through; color:#94a3b8; }
+      .week-done-badge { background:#22c55e; color:#fff; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; align-self:center; }
+      .dash-cards { display:flex; gap:10px; }
+      .dash-card { flex:1; background:#fff; border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; border:1px solid #e2e8f0; }
+      .dash-card.blue { border-top:3px solid #3b82f6; }
+      .dash-card.green { border-top:3px solid #22c55e; }
+      .dash-card.orange { border-top:3px solid #f59e0b; }
+      .dash-num { font-size:24px; font-weight:700; color:#1e293b; }
+      .dash-title { font-size:11px; color:#64748b; margin-top:2px; }
       </style>
 </head>
 <body>
@@ -229,6 +245,7 @@ const state = {
   aandachtBeschrijving: '',
   aandachtToonAfgevinkt: false,
   takenToonKlaar: false,
+  planningChecks: S.get('planningChecks', {}),
   checklisten: S.get('checklisten', []),
   berichten: [],
   checklistForm: false,
@@ -365,6 +382,56 @@ function renderApp() {
 
   const badge = n => n > 0 ? `<span class="nav-badge">${n > 9 ? '9+' : n}</span>` : '';
 
+// ── Jaarplanning data ─────────────────────────────────────────────────────────
+var JAARPLANNING = [
+  {id:'jp01',naam:'Smeren wasstraat',freq:6,start:1,cat:'Personeel'},
+  {id:'jp02',naam:'Smeren aandrijf- en omkeerstation + al het vuil weg',freq:4,start:3,cat:'Personeel'},
+  {id:'jp03',naam:'Vervangen droogdoeken',freq:7,start:2,cat:'Personeel'},
+  {id:'jp04',naam:'Controleren recyle putten + obas',freq:8,start:5,cat:'Personeel'},
+  {id:'jp05',naam:'Schoonmaken nozzles/sproeiers',freq:1,start:1,cat:'Personeel'},
+  {id:'jp06',naam:'Schoonmaken filters (wasboxen, wasstraat, e-kasten, beluchters)',freq:4,start:1,cat:'Personeel'},
+  {id:'jp07',naam:'Checken/schoonmaken chemiepompjes + hydrominors',freq:4,start:3,cat:'Personeel'},
+  {id:'jp08',naam:'Onderhoud ventilatoren drooghok',freq:1,start:1,cat:'Personeel'},
+  {id:'jp09',naam:'Vervangen stofzuigerslangen/monden',freq:8,start:2,cat:'Personeel'},
+  {id:'jp10',naam:'Textiel dakborstels grondig schoonmaken',freq:6,start:1,cat:'Personeel'},
+  {id:'jp11',naam:'Textiel RUW 1 grondig schoonmaken',freq:6,start:4,cat:'Personeel'},
+  {id:'jp12',naam:'Textiel RUW 2 grondig schoonmaken',freq:6,start:6,cat:'Personeel'},
+  {id:'jp13',naam:'Textiel PE 118 grondig schoonmaken',freq:6,start:8,cat:'Personeel'},
+  {id:'jp14',naam:'Textiel PE 135 grondig schoonmaken',freq:6,start:5,cat:'Personeel'},
+  {id:'jp15',naam:'Put legen wasstraat',freq:6,start:2,cat:'Personeel'},
+  {id:'jp16',naam:'Wasboxen schrobben',freq:4,start:1,cat:'Personeel'},
+  {id:'jp17',naam:'RVS wasboxen schoonmaken',freq:4,start:3,cat:'Personeel'},
+  {id:'jp18',naam:'Plein afspuiten',freq:4,start:2,cat:'Personeel'},
+  {id:'jp19',naam:'Prullenbakken uitspuiten',freq:8,start:9,cat:'Personeel'},
+  {id:'jp20',naam:'Onkruid weghalen',freq:8,start:10,cat:'Personeel'},
+  {id:'jp21',naam:'Struiken snoeien',freq:8,start:23,cat:'Personeel'},
+  {id:'jp22',naam:'Kantinekastjes schoonmaken',freq:4,start:4,cat:'Personeel'},
+  {id:'jp23',naam:'Oven schoonmaken',freq:4,start:4,cat:'Personeel'},
+  {id:'jp24',naam:'Koelkast schoonmaken',freq:4,start:2,cat:'Personeel'},
+  {id:'jp25',naam:'WC personeel grondig schoonmaken',freq:2,start:1,cat:'Personeel'},
+  {id:'jp26',naam:'WC klanten grondig schoonmaken',freq:2,start:2,cat:'Personeel'},
+  {id:'jp27',naam:'Statiegeld fles (oranje) legen',freq:6,start:1,cat:'Personeel'},
+  {id:'jl01',naam:'Controleren recyle putten + obas',freq:8,start:1,cat:'Leiding'},
+  {id:'jl02',naam:'Checken oliepotjes',freq:6,start:4,cat:'Leiding'},
+  {id:'jl03',naam:'Chemiemeting invullen Teams',freq:1,start:1,cat:'Leiding'},
+  {id:'jl04',naam:'Kantoor opruimen/schoonmaken',freq:4,start:1,cat:'Leiding'},
+  {id:'jl05',naam:'Wasboxen controleren werking',freq:4,start:3,cat:'Leiding'},
+  {id:'jl06',naam:'Voorraad automaten controleren/bestellen',freq:5,start:8,cat:'Leiding'},
+  {id:'jl07',naam:'Voorraad verkoopproducten (voor BLO)',freq:4,start:2,cat:'Leiding'},
+  {id:'jl08',naam:'Statiegeld inleveren',freq:6,start:5,cat:'Leiding'}
+];
+function huidigWeek() {
+  var start = new Date(new Date().getFullYear(), 0, 1);
+  var days = Math.floor((new Date() - start) / 86400000);
+  return Math.ceil((days + 1) / 7);
+}
+function takenDezeWeek(week) {
+  return JAARPLANNING.filter(function(t) {
+    if (t.freq === 1) return true;
+    var w = t.start; while (w <= 52) { if (w === week) return true; w += t.freq; } return false;
+  });
+}
+
   app.innerHTML = `
   <div class="header">
     <div class="header-logo">
@@ -403,57 +470,62 @@ function renderApp() {
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 function renderDashboard(el) {
-  const mijnOpen = state.taken.filter(t => !t.voltooid);
-  const totaalOpen = state.taken.filter(t => !t.voltooid).length;
-  const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
-  const openAandachtspunten = state.aandachtspunten.filter(a => !a.afgevinkt).length;
+  var week = huidigWeek();
+  var jaar = new Date().getFullYear();
+  var weekKey = jaar + 'W' + week;
+  var checks = state.planningChecks[weekKey] || [];
+  var dezeWeek = takenDezeWeek(week);
+  var personeel = dezeWeek.filter(function(t){ return t.cat === 'Personeel'; });
+  var leiding = dezeWeek.filter(function(t){ return t.cat === 'Leiding'; });
+  var totaal = dezeWeek.length;
+  var gedaan = dezeWeek.filter(function(t){ return checks.indexOf(t.id) !== -1; }).length;
+  var openTaken = state.taken.filter(function(t){ return !t.voltooid; }).length;
+  var openBood = state.boodschappen.filter(function(b){ return !b.afgevinkt; }).length;
+  var openNot = state.aandachtspunten.filter(function(a){ return !a.afgevinkt; }).length;
 
-  const countClass = n => n > 0 ? '' : ' zero';
+  function planItem(t) {
+    var checked = checks.indexOf(t.id) !== -1;
+    return '<div class="plan-item' + (checked ? ' plan-done' : '') + '" data-pid="' + t.id + '">' +
+      '<button class="check-btn ' + (checked ? 'done' : 'blue-ring') + '" data-ptoggle="' + t.id + '">' + (checked ? icon.check : '') + '</button>' +
+      '<span class="plan-naam">' + esc(t.naam) + '</span>' +
+      '</div>';
+  }
 
-  el.innerHTML = `<div class="page">
-    <p style="font-size:13px;color:#94a3b8">Goedendag,</p>
-    <p class="greeting-name">${state.user} 👋</p>
-    <p class="greeting-date">${new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'})}</p>
+  el.innerHTML = '<div class="page">' +
+    '<div class="page-header"><div>' +
+      '<div class="page-title">Week ' + week + ' — ' + gedaan + '/' + totaal + ' klaar</div>' +
+      '<div class="page-subtitle">Jaarplanning ' + jaar + '</div>' +
+    '</div>' +
+    (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">✓ Week klaar!</div>' : '') +
+    '</div>' +
+    '<div class="plan-progress"><div class="plan-bar" style="width:' + (totaal > 0 ? Math.round(gedaan/totaal*100) : 0) + '%"></div></div>' +
+    '<div class="plan-cat-label">Personeel (' + personeel.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + personeel.length + ')</div>' +
+    personeel.map(planItem).join('') +
+    '<div class="plan-cat-label" style="margin-top:12px">Leiding (' + leiding.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + leiding.length + ')</div>' +
+    leiding.map(planItem).join('') +
+    '<div class="dash-cards" style="margin-top:16px">' +
+      '<div class="dash-card blue" data-goto="taken"><div class="dash-num">' + openTaken + '</div><div class="dash-title">Open taken</div></div>' +
+      '<div class="dash-card green" data-goto="boodschappen"><div class="dash-num">' + openBood + '</div><div class="dash-title">Boodschappen</div></div>' +
+      '<div class="dash-card orange" data-goto="aandachtspunten"><div class="dash-num">' + openNot + '</div><div class="dash-title">Notities</div></div>' +
+    '</div>' +
+  '</div>';
 
-    <p class="section-label">Openstaand overzicht</p>
-    <div class="dash-grid">
-      <button class="dash-card" data-goto="taken">
-        <div class="dash-icon" style="background:#3b82f6">${icon.tasks}</div>
-        <span class="dash-count${countClass(mijnOpen.length)}">${mijnOpen.length}</span>
-        <div class="dash-title">Open taken</div>
-        <div class="dash-sub">${mijnOpen.length} open taken</div>
-      </button>
-      <button class="dash-card" data-goto="boodschappen">
-        <div class="dash-icon" style="background:#f97316">${icon.cart}</div>
-        <span class="dash-count${countClass(openBoodschappen)}">${openBoodschappen}</span>
-        <div class="dash-title">Boodschappen</div>
-        <div class="dash-sub">nog te halen</div>
-      </button>
-      <button class="dash-card dash-card-full" data-goto="aandachtspunten">
-        <div class="dash-icon" style="background:#9333ea">${icon.flag}</div>
-        <span class="dash-count${countClass(openAandachtspunten)}">${openAandachtspunten}</span>
-        <div class="dash-title">Aandachtspunten</div>
-        <div class="dash-sub">voor aankomende periode</div>
-      </button>
-    </div>
-
-    ${mijnOpen.length > 0 ? `
-    <p class="section-label">Jouw openstaande taken</p>
-    ${mijnOpen.slice(0,3).map(t=>`
-      <div class="task-preview">
-        <div class="dot"></div>
-        <span class="task-preview-text">${esc(t.tekst)}</span>
-      </div>`).join('')}
-    ${mijnOpen.length > 3 ? `<button class="more-link" data-goto="taken">+${mijnOpen.length-3} meer bekijken →</button>` : ''}
-    ` : ''}
-  </div>`;
-
-  el.querySelectorAll('[data-goto]').forEach(btn =>
-    btn.addEventListener('click', () => { state.tab = btn.dataset.goto; render(); })
-  );
+  el.querySelectorAll('[data-ptoggle]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = btn.dataset.ptoggle;
+      var cur = state.planningChecks[weekKey] ? state.planningChecks[weekKey].slice() : [];
+      var idx = cur.indexOf(id);
+      if (idx === -1) cur.push(id); else cur.splice(idx, 1);
+      state.planningChecks[weekKey] = cur;
+      S.set('planningChecks', state.planningChecks);
+      renderDashboard(el);
+    });
+  });
+  el.querySelectorAll('[data-goto]').forEach(function(c) {
+    c.addEventListener('click', function() { state.tab = c.dataset.goto; render(); });
+  });
 }
 
-// ── Taken ──────────────────────────────────────────────────────────────────
 function renderTaken(el) {
   var open = state.taken.filter(function(t){ return !t.voltooid; });
   var klaar = state.taken.filter(function(t){ return t.voltooid; });
