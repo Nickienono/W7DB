@@ -578,7 +578,7 @@ function renderDashboard(el) {
     '</div>' +
   '</div>';
 
-  var dashLeft=el.querySelector('.dash-left');if(dashLeft){var wc=document.createElement('div');wc.id='weer-card';wc.style.cssText='margin-top:60px;background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:1px solid #e2e8f0';wc.innerHTML='<div style=\"display:flex;align-items:center;gap:14px;margin-bottom:14px\"><span id=\"wc-ico\" style=\"font-size:36px\">⏳<\/span><div><div id=\"wc-temp\" style=\"font-size:20px;font-weight:700;color:#1e293b\">Laden...<\/div><div style=\"font-size:12px;color:#64748b\">Den Bosch<\/div><\/div><\/div><div style=\"border-top:1px solid #f1f5f9;padding-top:14px\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:10px\"><span style=\"font-size:18px\">🔮<\/span><span style=\"font-size:14px;font-weight:700;color:#374151\">Was voorspelling<\/span><\/div><div id=\"wc-badge\" style=\"margin-bottom:8px\"><\/div><div id=\"wc-tip\" style=\"font-size:12px;color:#6b7280\"><\/div><\/div>';dashLeft.appendChild(wc);}
+  var wc=document.createElement('div');wc.id='weer-card';wc.style.cssText='margin-bottom:20px;background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:14px;padding:18px 24px;color:#fff;width:100%;box-sizing:border-box;display:flex;gap:24px;align-items:stretch;flex-wrap:wrap';wc.innerHTML='<div style=\"display:flex;align-items:center;gap:16px;min-width:200px\"><span id=\"wc-ico\" style=\"font-size:52px;line-height:1\">\u26c5<\/span><div><div style=\"font-size:11px;font-weight:600;opacity:.65;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px\">\ud83d\ude97 Wasvoorspelling \u00b7 Den Bosch<\/div><div id=\"wc-temp\" style=\"font-size:36px;font-weight:700;line-height:1\">--\u00b0C<\/div><div id=\"wc-desc\" style=\"font-size:14px;opacity:.85;margin-top:4px\">Laden...<\/div><div id=\"wc-wind\" style=\"font-size:12px;opacity:.6;margin-top:6px\">&nbsp;<\/div><\/div><\/div><div id=\"wc-days\" style=\"display:flex;gap:10px;flex:1;align-items:center;flex-wrap:wrap;padding-left:8px\"><\/div>';el.insertBefore(wc,el.firstChild);
 
   // Confetti als alles net afgerond is
   if (gedaan === totaal && totaal > 0 && !wasAllesDone) {
@@ -688,6 +688,53 @@ function renderDashboard(el) {
 
 
   fetchWeer();
+}
+
+function fetchWeer() {
+  var ico=document.getElementById('wc-ico');
+  var temp=document.getElementById('wc-temp');
+  var desc=document.getElementById('wc-desc');
+  var wind=document.getElementById('wc-wind');
+  var days=document.getElementById('wc-days');
+  if(!ico) return;
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=51.6978&longitude=5.3037&current=temperature_2m,weathercode,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&wind_speed_unit=kmh&timezone=Europe/Amsterdam&forecast_days=5')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var c=d.current;
+    function wmo(code){
+      if(code===0)return{e:'☀️',t:'Helder'};
+      if(code<=2)return{e:'⛅',t:'Half bewolkt'};
+      if(code<=3)return{e:'☁️',t:'Bewolkt'};
+      if(code<=48)return{e:'🌫️',t:'Mist'};
+      if(code<=55)return{e:'🌦️',t:'Motregen'};
+      if(code<=65)return{e:'🌧️',t:'Regen'};
+      if(code<=75)return{e:'🌨️',t:'Sneeuw'};
+      if(code<=82)return{e:'🌧️',t:'Buien'};
+      if(code<=99)return{e:'⚡',t:'Onweer'};
+      return{e:'🌤️',t:''};
+    }
+    var today=wmo(c.weathercode);
+    if(ico)ico.textContent=today.e;
+    if(temp)temp.textContent=Math.round(c.temperature_2m)+'°C';
+    if(desc)desc.textContent=today.t;
+    if(wind)wind.textContent='💨 '+Math.round(c.windspeed_10m)+' km/u wind';
+    if(days){
+      var dn=['Zo','Ma','Di','Wo','Do','Vr','Za'];
+      var htm='';
+      d.daily.time.slice(1,5).forEach(function(date,i){
+        var idx=i+1;
+        var w=wmo(d.daily.weathercode[idx]);
+        var rain=d.daily.precipitation_probability_max[idx];
+        htm+='<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;text-align:center;min-width:72px">'
+          +'<div style="font-size:11px;opacity:.65;font-weight:700;text-transform:uppercase">'+dn[new Date(date).getDay()]+'</div>'
+          +'<div style="font-size:26px;margin:5px 0">'+w.e+'</div>'
+          +'<div style="font-size:13px;font-weight:700">'+Math.round(d.daily.temperature_2m_max[idx])+'° <span style="opacity:.5">'+Math.round(d.daily.temperature_2m_min[idx])+'°</span></div>'
+          +(rain>15?'<div style="font-size:10px;opacity:.65;margin-top:3px">💧'+rain+'%</div>':'')
+          +'</div>';
+      });
+      days.innerHTML=htm;
+    }
+  }).catch(function(){if(desc)desc.textContent='Geen verbinding';});
 }
 
 var JAARPLANNING=[
