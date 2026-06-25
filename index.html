@@ -447,6 +447,36 @@ function showConfetti() {
   setTimeout(function(){ cancelAnimationFrame(fr); if(cv.parentNode) cv.parentNode.removeChild(cv); }, 4000);
 }
 
+function renderJaarplanningTabel(curWeek){
+  var jaar=new Date().getFullYear();
+  var weken=[];
+  for(var i=0;i<=10;i++){var w=curWeek+i;if(w>52)w=w-52;weken.push(w);}
+  var taakMap={},alle=[];
+  weken.forEach(function(w){takenDezeWeek(w).forEach(function(t){if(!taakMap[t.id]){taakMap[t.id]=true;alle.push(t);}});});
+  alle.sort(function(a,b){return a.id<b.id?-1:1;});
+  var ths='<th style="padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:600;color:#64748b;white-space:nowrap;font-size:11px;text-align:left;position:sticky;left:0;z-index:2">Week</th>';
+  alle.forEach(function(t){ths+='<th style="padding:4px 8px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;color:#475569;font-size:11px;white-space:nowrap" title="'+esc(t.naam)+'">'+esc(t.naam)+'</th>';});
+  var trs='';
+  weken.forEach(function(w){
+    var weekKey=jaar+'W'+w;
+    var checks=state.planningChecks[weekKey]||[];
+    var dezeWeek=takenDezeWeek(w);
+    var dezeIds={};dezeWeek.forEach(function(t){dezeIds[t.id]=true;});
+    var isCur=w===curWeek;
+    var wkBg=isCur?'#fffbeb':'#f8fafc';
+    var tds='<td style="padding:4px 10px;border:1px solid #e2e8f0;font-weight:'+(isCur?'700':'500')+';color:'+(isCur?'#f59e0b':'#64748b')+';background:'+wkBg+';position:sticky;left:0;z-index:1;white-space:nowrap;font-size:12px">W'+w+(isCur?' ◄':'')+'</td>';
+    alle.forEach(function(t){
+      if(dezeIds[t.id]){
+        var chk=checks.indexOf(t.id)!==-1;
+        tds+='<td style="text-align:center;padding:4px;border:1px solid #e2e8f0;background:'+(isCur?'#fffbeb':'#fff')+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:22px;height:22px;border-radius:50%;border:2px solid '+(chk?'#22c55e':'#cbd5e1')+';background:'+(chk?'#22c55e':'#fff')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff">'+(chk?'✓':'')+'</button></td>';
+      } else {
+        tds+='<td style="text-align:center;border:1px solid #e2e8f0;background:#f8fafc;color:#e2e8f0;font-size:12px">-</td>';
+      }
+    });
+    trs+='<tr>'+tds+'</tr>';
+  });
+  return '<div style="width:100%;margin-top:28px;padding-bottom:24px"><div style="font-size:25px;font-weight:700;color:#1e293b;margin-bottom:14px">Jaarplanning</div><div style="overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)"><table style="border-collapse:collapse;font-size:12px;width:max-content;min-width:100%"><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table></div></div>';
+}
 function renderDashboard(el) {
   (function(){var now=Date.now(),cut=60*24*60*60*1000,oud=state.taken.filter(function(t){return t.voltooid&&t.voltooid_op&&(now-new Date(t.voltooid_op).getTime())>cut;});if(oud.length){oud.forEach(function(t){fetch(SBURL+'/rest/v1/taken?id=eq.'+t.id,{method:'DELETE',headers:{"apikey":SBKEY,"Authorization":"Bearer "+SBKEY}});});state.taken=state.taken.filter(function(t){return!oud.find(function(d){return d.id===t.id;});});try{localStorage.setItem('w7_taken',JSON.stringify(state.taken));}catch(e){}}})();
   var week = huidigWeek();
@@ -495,15 +525,14 @@ function renderDashboard(el) {
       '</div>' +
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.cart + ' Boodschappen</span></div>' +
-        '<div class="quick-add-row" style="gap:4px"><input id="db-boods-naam" class="input" style="flex:2;height:34px;font-size:13px" placeholder="Product..." /><input id="db-boods-lev" class="input" style="flex:2;height:34px;font-size:13px" placeholder="Leverancier..." /><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Aantal..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
+        '<div class="quick-add-row"><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Boodschap toevoegen..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.boodschappen.length > 0 ?
-          '<div style="display:flex;padding:2px 4px 4px 36px;font-size:11px;color:#94a3b8;font-weight:600"><span style="flex:2">Product</span><span style="flex:2;padding-left:8px">Leverancier</span><span style="flex:1;padding-left:4px">Aantal</span></div>' +
           state.boodschappen.map(function(b){
             var bc=b.afgekocht?'done':'blue-ring';
             var bi=b.afgekocht?icon.check:'';
             var ro=b.afgekocht?' style="opacity:0.55"':'';
             var ns=b.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
-            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam" style="flex:2"'+ns+'>'+esc(b.naam)+'</span>'+(b.afgekocht?'<span style="flex:2;font-size:12px;color:#94a3b8;text-decoration:line-through;padding-left:8px">':'<span style="flex:2;font-size:12px;color:#64748b;padding-left:8px">')+esc(b.leverancier||'')+'</span>'+(b.afgekocht?'<span style="flex:1;font-size:12px;color:#94a3b8;text-decoration:line-through;padding-left:4px">':'<span style="flex:1;font-size:12px;color:#64748b;padding-left:4px">')+esc(b.hoeveel||'')+'</span></div>';
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(b.naam)+(b.hoeveel?' ('+esc(b.hoeveel)+')':'')+'</span><span class="item-door">'+esc(displayNaam(b.door))+'</span></div>';
           }).join('') :
           '<div class="empty-small">Geen boodschappen</div>'
         ) +
@@ -538,7 +567,8 @@ function renderDashboard(el) {
       '<div class="plan-cat-label" style="margin-top:10px">Leiding (' + leiding.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + leiding.length + ')</div>' +
       leiding.map(planItem).join('') +
     '</div>' +
-  '</div>';
+  '</div>' +
+  renderJaarplanningTabel(week);
 
   // Confetti als alles net afgerond is
   if (gedaan === totaal && totaal > 0 && !wasAllesDone) {
@@ -582,6 +612,21 @@ function renderDashboard(el) {
     });
   });
 
+  // Jaarplanning checkboxes
+  el.querySelectorAll('.jp-cb').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var parts = btn.dataset.jp.split('|');
+      var weekKey = parts[0] + 'W' + parts[1];
+      var taskId = parts[2];
+      var checks = (state.planningChecks[weekKey] || []).slice();
+      var idx = checks.indexOf(taskId);
+      if(idx !== -1) checks.splice(idx, 1); else checks.push(taskId);
+      state.planningChecks[weekKey] = checks;
+      S.set('planningChecks', state.planningChecks);
+      renderDashboard(el);
+    });
+  });
+
   // Quick-add taken vanuit dashboard
   var dbTaakBtn = el.querySelector('#db-taak-btn');
   var dbTaakIn = el.querySelector('#db-taak-in');
@@ -599,21 +644,17 @@ function renderDashboard(el) {
 
   // Quick-add boodschappen vanuit dashboard
   var dbBoodsBtn = el.querySelector('#db-boods-btn');
-  var dbBoodsNaamIn = el.querySelector('#db-boods-naam');
-  var dbBoodsLevIn = el.querySelector('#db-boods-lev');
   var dbBoodsIn = el.querySelector('#db-boods-in');
-  if(dbBoodsBtn && dbBoodsNaamIn) {
+  if(dbBoodsBtn && dbBoodsIn) {
     var saveDashBoods = function() {
-      var naam = dbBoodsNaamIn.value.trim();
+      var naam = dbBoodsIn.value.trim();
       if(!naam) return;
-      var lev = dbBoodsLevIn ? dbBoodsLevIn.value.trim() : '';
-      var aantal = dbBoodsIn ? dbBoodsIn.value.trim() : '';
-      state.boodschappen.unshift({id:uid(), naam:naam, leverancier:lev, hoeveel:aantal, afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
+      state.boodschappen.unshift({id:uid(), naam:naam, hoeveel:'', afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
       S.set('boodschappen', state.boodschappen);
       renderDashboard(el); renderNav();
     };
     dbBoodsBtn.addEventListener('click', saveDashBoods);
-    [dbBoodsNaamIn,dbBoodsLevIn,dbBoodsIn].filter(Boolean).forEach(function(inp){inp.addEventListener('keydown', function(e){ if(e.key==='Enter') saveDashBoods(); }); });
+    dbBoodsIn.addEventListener('keydown', function(e){ if(e.key==='Enter') saveDashBoods(); });
   }
 
   // Quick-add aandachtspunten vanuit dashboard
