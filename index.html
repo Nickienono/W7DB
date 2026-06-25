@@ -540,10 +540,11 @@ function renderDashboard(el) {
         (state.aandachtspunten.length > 0 ?
           state.aandachtspunten.map(function(a){
             var bc=a.afgekocht?'done':'blue-ring';
-            var bi=a.afgekocht?icon.check:(a.inProgress?'●':'');
+            var bi=a.afgekocht?icon.check:(a.inProgress?'!':'');
             var ro=a.afgekocht?' style="opacity:0.55"':(a.inProgress?' style="background:#fef9c3;border-radius:6px"':'');
             var ns=a.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
-            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0'+(a.inProgress&&!a.afgekocht?';background:#fbbf24;border:2px solid #f59e0b':'')+'" data-toggle-aand="'+a.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(a.titel)+'</span><span class="item-door">'+esc(displayNaam(a.door))+'</span></div>';
+            var bs='margin-right:8px;flex-shrink:0'+(a.inProgress&&!a.afgekocht?';background:#fbbf24;border:2px solid #f59e0b':'');
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="'+bs+'" data-toggle-aand="'+a.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(a.titel)+'</span><span class="item-door">'+esc(displayNaam(a.door))+'</span></div>';
           }).join('') :
           '<div class="empty-small">Geen onderhoud</div>'
         ) +
