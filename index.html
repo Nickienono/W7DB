@@ -498,21 +498,29 @@ function renderDashboard(el) {
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.cart + ' Boodschappen</span></div>' +
         '<div class="quick-add-row"><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Boodschap toevoegen..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
-        (state.boodschappen.filter(function(b){return !b.afgekocht;}).length > 0 ?
-          state.boodschappen.filter(function(b){return !b.afgekocht;}).slice(0,10).map(function(b){
-            return '<div class="dash-item-row"><button class="check-btn blue-ring" style="margin-right:8px;flex-shrink:0" data-toggle-boods="' + b.id + '"></button><span class="dash-item-naam">' + esc(b.naam) + (b.hoeveel ? ' (' + esc(b.hoeveel) + ')' : '') + '</span><span class="item-door">' + esc(displayNaam(b.door)) + '</span></div>';
+        (state.boodschappen.length > 0 ?
+          state.boodschappen.map(function(b){
+            var bc=b.afgekocht?'done':'blue-ring';
+            var bi=b.afgekocht?icon.check:'';
+            var ro=b.afgekocht?' style="opacity:0.55"':'';
+            var ns=b.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(b.naam)+(b.hoeveel?' ('+esc(b.hoeveel)+')':'')+'</span><span class="item-door">'+esc(displayNaam(b.door))+'</span></div>';
           }).join('') :
-          '<div class="empty-small">Geen openstaande boodschappen</div>'
+          '<div class="empty-small">Geen boodschappen</div>'
         ) +
       '</div>' +
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.flag + ' Aandachtspunten</span></div>' +
         '<div class="quick-add-row"><input id="db-aand-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Aandachtspunt toevoegen..." /><button id="db-aand-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
-        (state.aandachtspunten.filter(function(a){return !a.afgekocht;}).length > 0 ?
-          state.aandachtspunten.filter(function(a){return !a.afgekocht;}).slice(0,10).map(function(a){
-            return '<div class="dash-item-row"><button class="check-btn blue-ring" style="margin-right:8px;flex-shrink:0" data-toggle-aand="' + a.id + '"></button><span class="dash-item-naam">' + esc(a.titel) + '</span><span class="item-door">' + esc(displayNaam(a.door)) + '</span></div>';
+        (state.aandachtspunten.length > 0 ?
+          state.aandachtspunten.map(function(a){
+            var bc=a.afgekocht?'done':'blue-ring';
+            var bi=a.afgekocht?icon.check:'';
+            var ro=a.afgekocht?' style="opacity:0.55"':'';
+            var ns=a.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-aand="'+a.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(a.titel)+'</span><span class="item-door">'+esc(displayNaam(a.door))+'</span></div>';
           }).join('') :
-          '<div class="empty-small">Geen openstaande aandachtspunten</div>'
+          '<div class="empty-small">Geen aandachtspunten</div>'
         ) +
       '</div>' +
     '</div>' +
