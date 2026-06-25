@@ -494,7 +494,7 @@ function renderDashboard(el) {
         '<div class="quick-add-row"><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Boodschap toevoegen..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.boodschappen.filter(function(b){return !b.afgekocht;}).length > 0 ?
           state.boodschappen.filter(function(b){return !b.afgekocht;}).slice(0,10).map(function(b){
-            return '<div class="dash-item-row"><span class="dash-item-naam">' + esc(b.naam) + (b.hoeveel ? ' (' + esc(b.hoeveel) + ')' : '') + '</span><span class="item-door">' + esc(displayNaam(b.door)) + '</span></div>';
+            return '<div class="dash-item-row"><button class="check-btn blue-ring" style="margin-right:8px;flex-shrink:0" data-toggle-boods="' + b.id + '"></button><span class="dash-item-naam">' + esc(b.naam) + (b.hoeveel ? ' (' + esc(b.hoeveel) + ')' : '') + '</span><span class="item-door">' + esc(displayNaam(b.door)) + '</span></div>';
           }).join('') :
           '<div class="empty-small">Geen openstaande boodschappen</div>'
         ) +
@@ -504,7 +504,7 @@ function renderDashboard(el) {
         '<div class="quick-add-row"><input id="db-aand-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Aandachtspunt toevoegen..." /><button id="db-aand-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.aandachtspunten.filter(function(a){return !a.afgekocht;}).length > 0 ?
           state.aandachtspunten.filter(function(a){return !a.afgekocht;}).slice(0,10).map(function(a){
-            return '<div class="dash-item-row"><span class="dash-item-naam">' + esc(a.titel) + '</span><span class="item-door">' + esc(displayNaam(a.door)) + '</span></div>';
+            return '<div class="dash-item-row"><button class="check-btn blue-ring" style="margin-right:8px;flex-shrink:0" data-toggle-aand="' + a.id + '"></button><span class="dash-item-naam">' + esc(a.titel) + '</span><span class="item-door">' + esc(displayNaam(a.door)) + '</span></div>';
           }).join('') :
           '<div class="empty-small">Geen openstaande aandachtspunten</div>'
         ) +
@@ -551,6 +551,21 @@ function renderDashboard(el) {
     btn.addEventListener('click', function() {
       var t = state.taken.find(function(x){ return x.id === btn.dataset.toggle; });
       if (t) { t.voltooid = !t.voltooid; S.set('taken', state.taken); renderDashboard(el); renderNav(); }
+    });
+  });
+
+  // Toggle boodschappen vanuit dashboard
+  el.querySelectorAll('[data-toggle-boods]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var b = state.boodschappen.find(function(x){ return x.id === btn.dataset.toggleBoods; });
+      if (b) { b.afgekocht = !b.afgekocht; S.set('boodschappen', state.boodschappen); renderDashboard(el); renderNav(); }
+    });
+  });
+  // Toggle aandachtspunten vanuit dashboard
+  el.querySelectorAll('[data-toggle-aand]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var a = state.aandachtspunten.find(function(x){ return x.id === btn.dataset.toggleAand; });
+      if (a) { a.afgekocht = !a.afgekocht; S.set('aandachtspunten', state.aandachtspunten); renderDashboard(el); renderNav(); }
     });
   });
 
