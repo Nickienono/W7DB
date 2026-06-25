@@ -13,13 +13,13 @@ textarea{resize:none}
 
 /* Layout */
 #app{min-height:100vh;background:#f1f5f9;position:relative}
-.header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.header{position:sticky;top:0;z-index:100;background:#0e2f52;border-bottom:none;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.25)}.header-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;}
 .header-logo{display:flex;align-items:center;gap:8px}
-.logo-badge{width:28px;height:28px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:11px}
-.header-title{font-weight:700;font-size:14px;color:#1e293b}
+.logo-badge{width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+.header-title{display:none}
 .header-right{display:flex;align-items:center;gap:12px}
-.user-pill{display:flex;align-items:center;gap:6px;color:#64748b;font-size:13px;font-weight:500}
-.btn-logout{background:none;color:#94a3b8;padding:4px;border-radius:6px;display:flex}
+.user-pill{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.85);font-size:13px;font-weight:500}
+.btn-logout{background:none;color:rgba(255,255,255,0.6);padding:4px;border-radius:6px;display:flex}
 .btn-logout:hover{color:#64748b}
 main{padding-bottom:80px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -1px 8px rgba(0,0,0,.06);z-index:100}
@@ -204,13 +204,13 @@ main{padding-bottom:80px}
 <div id="app"></div>
 
 <script>
-// ── Data opslag ──────────────────────────────────────────────────────────────
+// ââ Data opslag ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const S = {
   get(k, fb){ try{ return JSON.parse(localStorage.getItem('w7_'+k))??fb }catch{ return fb } },
   set(k,v){ try{ localStorage.setItem('w7_'+k,JSON.stringify(v)) }catch{} }
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ââ Helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 
 const fmtDate = iso => {
@@ -234,7 +234,7 @@ const icon = {
   refresh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
 };
 
-// ── App State ────────────────────────────────────────────────────────────────
+// ââ App State ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const state = {
   user: S.get('user', null),
   tab: 'home',
@@ -263,7 +263,7 @@ const state = {
   berichtTekst: '',
 };
 
-// ── Render engine ────────────────────────────────────────────────────────────
+// ââ Render engine ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const app = document.getElementById('app');
 
 function render() {
@@ -271,7 +271,7 @@ function render() {
   renderApp();
 }
 
-// ── Login ────────────────────────────────────────────────────────────────────
+// ââ Login ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderLogin() {
   app.innerHTML = `
   <div class="login-screen">
@@ -316,7 +316,7 @@ function renderLogin() {
 }
 
 
-// ── Supabase sync ───────────────────────────────────────────────
+// ââ Supabase sync âââââââââââââââââââââââââââââââââââââââââââââââ
 var SBURL = "https://eobsxmbwkcmckfzpzshr.supabase.co";
 var SBKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvYnN4bWJ3a2NtY2tmenB6c2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDcxNDcsImV4cCI6MjA5Nzc4MzE0N30.kUnVZgjeNm4zMeYUNqhKJoDKeCm3K63qphK6INWJJxE";
 
@@ -382,7 +382,7 @@ async function doLogin(naam) {
   if (changed) render();
 }
 
-// ── App shell ────────────────────────────────────────────────────────────────
+// ââ App shell ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderApp() {
   const openTaken = state.taken.filter(t => !t.voltooid).length;
   const openBoodschappen = state.boodschappen.filter(b => !b.afgevinkt).length;
@@ -395,8 +395,10 @@ function renderApp() {
   app.innerHTML = `
   <div class="header">
     <div class="header-logo">
-      <div class="logo-badge">W7</div>
-      <span class="header-title">Washin7</span>
+      <svg width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><rect width="36" height="36" rx="7" fill="rgba(255,255,255,0.12)"/><text x="18" y="27" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#f07828">7</text></svg>
+    </div>
+    <div class="header-center">
+      <svg viewBox="0 0 220 44" height="40" xmlns="http://www.w3.org/2000/svg"><text x="2" y="38" font-family="Arial Black,sans-serif" font-weight="900" font-size="38" fill="#f07828" letter-spacing="-1">WASHIN</text><circle cx="200" cy="22" r="20" fill="rgba(255,255,255,0.1)" stroke="#f07828" stroke-width="2.5"/><text x="200" y="31" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="24" fill="#f07828">7</text></svg>
     </div>
     <div class="header-right">
       <div class="user-pill">${icon.user} ${state.user}</div>
@@ -428,7 +430,7 @@ function renderApp() {
   else renderChecklisten(main);
 }
 
-// ── Dashboard ────────────────────────────────────────────────────────────────
+// ââ Dashboard ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function showConfetti() {
   var cv = document.createElement('canvas');
@@ -474,7 +476,7 @@ function renderDashboard(el) {
     '<div class="dash-left">' +
       '<div class="page-header" style="margin-bottom:16px"><div>' +
         '<div class="page-title">Hallo, ' + esc(displayNaam(state.user)) + '!</div>' +
-        '<div class="page-subtitle">Week ' + week + ' · ' + new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) + '</div>' +
+        '<div class="page-subtitle">Week ' + week + ' Â· ' + new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) + '</div>' +
       '</div></div>' +
       '<div class="dash-cards">' +
         '<div class="dash-card blue" data-goto="taken"><div class="dash-num">' + openTaken + '</div><div class="dash-title">Open taken</div></div>' +
@@ -496,7 +498,7 @@ function renderDashboard(el) {
           '<div class="plan-title">Jaarplanning week ' + week + '</div>' +
           '<div class="plan-sub">' + gedaan + ' / ' + totaal + ' klaar</div>' +
         '</div>' +
-        (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">✓ Klaar!</div>' : '') +
+        (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">â Klaar!</div>' : '') +
       '</div>' +
       '<div class="plan-progress"><div class="plan-bar" style="width:' + pct + '%"></div></div>' +
       '<div class="plan-cat-label">Personeel (' + personeel.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + personeel.length + ')</div>' +
@@ -581,7 +583,7 @@ function renderTaken(el) {
   el.innerHTML = '<div class="page">' +
     '<div class="page-header">' +
       '<div><div class="page-title">Taken</div>' +
-      '<div class="page-subtitle">' + open.length + ' open' + (klaar.length > 0 ? ' · ' + klaar.length + ' klaar' : '') + '</div></div>' +
+      '<div class="page-subtitle">' + open.length + ' open' + (klaar.length > 0 ? ' Â· ' + klaar.length + ' klaar' : '') + '</div></div>' +
       '<button class="fab blue" id="taak-add-btn">' + icon.plus + '</button></div>' +
     (state.takenForm ?
       '<div class="form-card">' +
@@ -605,7 +607,7 @@ function renderTaken(el) {
       }).join("")) +
     (klaar.length > 0 ?
       '<div class="collapse-actions">' +
-        '<button class="collapse-btn" id="toggle-klaar">' + (state.takenToonKlaar ? "▲" : "▶") + ' Klaar (' + klaar.length + ')</button>' +
+        '<button class="collapse-btn" id="toggle-klaar">' + (state.takenToonKlaar ? "â²" : "â¶") + ' Klaar (' + klaar.length + ')</button>' +
         '<button class="del-done-btn" id="del-klaar">Verwijder afgerond</button>' +
       '</div>' +
       (state.takenToonKlaar ? klaar.map(function(t){
@@ -650,7 +652,7 @@ function renderTaken(el) {
   });
 }
 
-// ── Boodschappen ─────────────────────────────────────────────────────────────
+// ââ Boodschappen âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderBoodschappen(el) {
   const open = state.boodschappen.filter(b => !b.afgevinkt);
   const afgevinkt = state.boodschappen.filter(b => b.afgevinkt);
@@ -688,7 +690,7 @@ function renderBoodschappen(el) {
     ${afgevinkt.length > 0 ? `
     <div class="collapse-actions">
       <button class="collapse-btn" id="toggle-afgevinkt">
-        ${state.boodschappenToonAfgevinkt ? '▲' : '▶'} Afgevinkt (${afgevinkt.length})
+        ${state.boodschappenToonAfgevinkt ? 'â²' : 'â¶'} Afgevinkt (${afgevinkt.length})
       </button>
       <button class="del-done-btn" id="del-afgevinkt">Verwijder afgevinkt</button>
     </div>
@@ -696,7 +698,7 @@ function renderBoodschappen(el) {
     <div class="item-row dimmed">
       <button class="check-btn done" data-toggle="${b.id}">${icon.check}</button>
       <div class="item-body">
-        <span class="item-title struck">${esc(b.naam)}${b.hoeveel ? ' — '+esc(b.hoeveel) : ''}</span>
+        <span class="item-title struck">${esc(b.naam)}${b.hoeveel ? ' â '+esc(b.hoeveel) : ''}</span>
       </div>
       <button class="delete-btn" data-del="${b.id}">${icon.trash}</button>
     </div>`).join('') : ''}
@@ -735,7 +737,7 @@ function renderBoodschappen(el) {
   );
 }
 
-// ── Aandachtspunten ───────────────────────────────────────────────────────────
+// ââ Aandachtspunten âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderAandachtspunten(el) {
   const open = state.aandachtspunten.filter(a => !a.afgevinkt);
   const afgevinkt = state.aandachtspunten.filter(a => a.afgevinkt);
@@ -780,7 +782,7 @@ function renderAandachtspunten(el) {
     ${afgevinkt.length > 0 ? `
     <div class="collapse-actions">
       <button class="collapse-btn" id="toggle-afgehandeld">
-        ${state.aandachtToonAfgevinkt ? '▲' : '▶'} Afgehandeld (${afgevinkt.length})
+        ${state.aandachtToonAfgevinkt ? 'â²' : 'â¶'} Afgehandeld (${afgevinkt.length})
       </button>
     </div>
     ${state.aandachtToonAfgevinkt ? afgevinkt.map(a => `
@@ -826,7 +828,7 @@ function renderAandachtspunten(el) {
   );
 }
 
-// ── Update nav badges without full re-render ─────────────────────────────────
+// ââ Update nav badges without full re-render âââââââââââââââââââââââââââââââââ
 function renderNav() {
   const navEl = document.querySelector('.nav-inner');
   if (!navEl) return;
@@ -848,17 +850,17 @@ function renderNav() {
   });
 }
 
-// ── XSS escape ───────────────────────────────────────────────────────────────
+// ââ XSS escape âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 
-// ── Display naam helper ──────────────────────────────────────────────────────
+// ââ Display naam helper ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function displayNaam(n) { return n === "Assistent" ? "Tom" : n; }
 
-// ── Supabase insert/update ───────────────────────────────────────────────────
+// ââ Supabase insert/update âââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function sbInsert(tabel, rij) {
   try {
     await fetch(SBURL + "/rest/v1/" + tabel, {
@@ -878,7 +880,7 @@ async function sbUpdate(tabel, id, velden) {
   } catch(e) { console.warn("sbUpdate fout", e); }
 }
 
-// ── Checklisten ──────────────────────────────────────────────────────────────
+// ââ Checklisten ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderChecklisten(el) {
   if (state.checklistActief) {
     var cl = state.checklisten.find(function(c){ return c.id === state.checklistActief; });
@@ -887,14 +889,14 @@ function renderChecklisten(el) {
     var klaar = items.filter(function(i){ return i.afgevinkt; }).length;
     var pct = items.length > 0 ? Math.round(klaar/items.length*100) : 0;
     el.innerHTML = '<div class="page">' +
-      '<button class="cl-back" id="cl-terug">← Terug</button>' +
+      '<button class="cl-back" id="cl-terug">â Terug</button>' +
       '<div class="page-header" style="margin-top:0">' +
         '<div><div class="page-title">' + esc(cl.naam) + '</div>' +
         '<div class="page-subtitle">' + klaar + '/' + items.length + ' gedaan</div></div>' +
         '<button id="cl-reset" style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer">Reset</button>' +
       '</div>' +
       '<div class="cl-progress" style="margin-bottom:14px"><div class="cl-bar" style="width:' + pct + '%"></div></div>' +
-      (pct===100 ? '<div style="text-align:center;color:#16a34a;font-weight:700;margin-bottom:12px">✓ Checklist voltooid!</div>' : '') +
+      (pct===100 ? '<div style="text-align:center;color:#16a34a;font-weight:700;margin-bottom:12px">â Checklist voltooid!</div>' : '') +
       '<div class="card">' +
         items.map(function(item){
           return '<div class="cl-item-row">' +
@@ -929,11 +931,11 @@ function renderChecklisten(el) {
       '<div class="form-card" style="border-color:#dcfce7">' +
         '<div class="form-label">Nieuwe checklist</div>' +
         '<input id="cl-naam-inp" class="input" placeholder="Naam (bijv. Ochtend opening)" value="' + esc(state.checklistNaam) + '" style="margin-bottom:8px"/>' +
-        '<textarea id="cl-items-inp" class="input" rows="5" placeholder="Items, één per regel...">' + esc(state.checklistItemsTekst) + '</textarea>' +
+        '<textarea id="cl-items-inp" class="input" rows="5" placeholder="Items, Ã©Ã©n per regel...">' + esc(state.checklistItemsTekst) + '</textarea>' +
         '<div class="form-actions"><button class="btn-cancel" id="cl-cancel">Annuleer</button><button class="btn-save" style="background:#16a34a" id="cl-save">Aanmaken</button></div>' +
       '</div>' : '') +
     (state.checklisten.length === 0 && !state.checklistForm ?
-      '<div class="empty-state"><p>Geen checklisten.</p><small>Klik op + om er één aan te maken.</small></div>' :
+      '<div class="empty-state"><p>Geen checklisten.</p><small>Klik op + om er Ã©Ã©n aan te maken.</small></div>' :
       state.checklisten.map(function(c){
         var its = c.items||[]; var kl = its.filter(function(i){return i.afgevinkt;}).length;
         var p = its.length>0 ? Math.round(kl/its.length*100) : 0;
@@ -942,7 +944,7 @@ function renderChecklisten(el) {
           '<button class="delete-btn" data-del="' + c.id + '">' + icon.trash + '</button></div>' +
           '<div class="cl-meta">' + kl + '/' + its.length + ' items afgevinkt</div>' +
           '<div class="cl-progress"><div class="cl-bar" style="width:' + p + '%"></div></div>' +
-          (p===100 ? '<div style="font-size:11px;color:#16a34a;margin-top:5px;font-weight:600">✓ Voltooid!</div>' : '') +
+          (p===100 ? '<div style="font-size:11px;color:#16a34a;margin-top:5px;font-weight:600">â Voltooid!</div>' : '') +
         '</div>';
       }).join('')) +
   '</div>';
@@ -969,7 +971,7 @@ function renderChecklisten(el) {
   });
 }
 
-// ── Berichten ────────────────────────────────────────────────────────────────
+// ââ Berichten ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderBerichten(el) {
   if (window._chatTimer) clearInterval(window._chatTimer);
   function teken() {
@@ -1010,7 +1012,7 @@ function renderBerichten(el) {
   }, 20000);
 }
 
-// ── Start ────────────────────────────────────────────────────────────────────
+// ââ Start ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 render();
 </script>
 </body>
