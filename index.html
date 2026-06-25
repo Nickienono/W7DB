@@ -457,7 +457,7 @@ function renderJaarplanningTabel(curWeek){
   var ths='<th style="padding:4px 7px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;color:#64748b;text-align:left;position:sticky;left:0;z-index:2;white-space:nowrap">Taak</th>';
   weken.forEach(function(w){
     var isCur=w===curWeek;
-    ths+='<th style="padding:4px 7px;background:'+(isCur?'#fffbeb':'#f8fafc')+';border:1px solid #e2e8f0;font-size:11px;font-weight:'+(isCur?'700':'500')+';color:'+(isCur?'#f59e0b':'#64748b')+';text-align:center;white-space:nowrap">W'+w+'</th>';
+    ths+='<th style="padding:4px 7px;background:'+(isCur?'#dbeafe':'#f8fafc')+';border:1px solid '+(isCur?'#93c5fd':'#e2e8f0')+';font-size:11px;font-weight:'+(isCur?'700':'500')+';color:'+(isCur?'#1d4ed8':'#64748b')+';text-align:center;white-space:nowrap">W'+w+'</th>';
   });
   var trs='';
   alle.forEach(function(t){
@@ -470,9 +470,9 @@ function renderJaarplanningTabel(curWeek){
       var dezeIds={};dezeWeek.forEach(function(x){dezeIds[x.id]=true;});
       if(dezeIds[t.id]){
         var chk=checks.indexOf(t.id)!==-1;
-        tds+='<td style="text-align:center;padding:2px;border:1px solid #e2e8f0;background:'+(isCur?'#fffbeb':'#fff')+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+(chk?'#22c55e':'#cbd5e1')+';background:'+(chk?'#22c55e':'#fff')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff">'+(chk?'✓':'')+'</button></td>';
+        tds+='<td style="text-align:center;padding:2px;border:1px solid '+(isCur?'#93c5fd':'#e2e8f0')+';background:'+(isCur?'#eff6ff':'#fff')+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+(chk?'#22c55e':'#cbd5e1')+';background:'+(chk?'#22c55e':'#fff')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff">'+(chk?'✓':'')+'</button></td>';
       } else {
-        tds+='<td style="text-align:center;border:1px solid #e2e8f0;background:#f8fafc;color:#e2e8f0;font-size:11px">-</td>';
+        tds+='<td style="text-align:center;border:1px solid '+(isCur?'#93c5fd':'#e2e8f0')+';background:'+(isCur?'#eff6ff':'#f8fafc')+';color:#e2e8f0;font-size:11px">-</td>';
       }
     });
     trs+='<tr>'+tds+'</tr>';
@@ -713,7 +713,7 @@ var JAARPLANNING=[
 {id:"jl05",naam:"Wasboxen controleren werking",freq:4,start:3,cat:"Leiding"},
 {id:"jl06",naam:"Voorraad automaten controleren/bestellen",freq:5,start:8,cat:"Leiding"},
 {id:"jl07",naam:"Voorraad verkoopproducten (voor BLO)",freq:4,start:2,cat:"Leiding"},
-{id:"jl08",naam:"Statiegeld inleveren",freq:6,start:5,cat:"Leiding"}
+{id:"jl08",naam:"Statiegeld inleveren",freq:1,start:1,cat:"Leiding"}
 ];
 
 function huidigWeek(){var ref=new Date(2026,5,22);var now=new Date();var days=Math.floor((now-ref)/86400000);return 26+Math.floor(days/7);}
