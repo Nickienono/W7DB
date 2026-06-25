@@ -336,7 +336,6 @@ async function sbSync(tabel, arr) {
   try {
     var h = { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY, "Content-Type": "application/json" };
     if (arr.length > 0) {
-      if(tabel==='taken') arr=arr.map(function(x){return {id:x.id,tekst:x.tekst,voor:x.voor,door:x.door,voltooid:x.voltooid,aangemaakt:x.aangemaakt};});
       await fetch(SBURL + "/rest/v1/" + tabel, {
         method: "POST",
         headers: Object.assign({}, h, { "Prefer": "resolution=merge-duplicates" }),
@@ -627,18 +626,7 @@ function renderDashboard(el) {
     dbAandIn.addEventListener('keydown', function(e){ if(e.key==='Enter') saveDashAand(); });
   }
 
-  // Live polling dashboard - elke 15s bijwerken
-  if(window._dashTimer) clearInterval(window._dashTimer);
-  window._dashTimer = setInterval(function(){
-    if(state.tab !== 'home'){ clearInterval(window._dashTimer); return; }
-    Promise.all([sbLoad('taken'), sbLoad('boodschappen'), sbLoad('aandachtspunten')]).then(function(res){
-      var t=res[0],b=res[1],a=res[2],changed=false;
-      if(t&&JSON.stringify(t)!==JSON.stringify(state.taken)){state.taken=t;try{localStorage.setItem('w7_taken',JSON.stringify(t));}catch(e){}changed=true;}
-      if(b&&JSON.stringify(b)!==JSON.stringify(state.boodschappen)){state.boodschappen=b;try{localStorage.setItem('w7_boodschappen',JSON.stringify(b));}catch(e){}changed=true;}
-      if(a&&JSON.stringify(a)!==JSON.stringify(state.aandachtspunten)){state.aandachtspunten=a;try{localStorage.setItem('w7_aandachtspunten',JSON.stringify(a));}catch(e){}changed=true;}
-      if(changed) renderDashboard(el);
-    });
-  }, 15000);
+
 }
 
 var JAARPLANNING=[
