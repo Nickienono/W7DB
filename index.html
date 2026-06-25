@@ -520,14 +520,15 @@ function renderDashboard(el) {
       '</div>' +
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.cart + ' Boodschappen</span></div>' +
-        '<div class="quick-add-row"><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Boodschap toevoegen..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
+        '<div style="display:flex;padding:2px 4px 4px 44px;font-size:11px;color:#94a3b8;font-weight:600"><span style="flex:2">Product</span><span style="flex:0.7">Aantal</span><span style="flex:1.5">Leverancier</span></div>' +
+        '<div class="quick-add-row" style="gap:4px"><input id="db-boods-naam" class="input" style="flex:2;height:30px;font-size:12px" placeholder="Product..." /><input id="db-boods-in" class="input" style="flex:1;height:30px;font-size:12px" placeholder="Aantal..." /><input id="db-boods-lev" class="input" style="flex:2;height:30px;font-size:12px" placeholder="Leverancier..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.boodschappen.length > 0 ?
           state.boodschappen.map(function(b){
             var bc=b.afgekocht?'done':'blue-ring';
             var bi=b.afgekocht?icon.check:'';
             var ro=b.afgekocht?' style="opacity:0.55"':'';
             var ns=b.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
-            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(b.naam)+(b.hoeveel?' ('+esc(b.hoeveel)+')':'')+'</span><span class="item-door">'+esc(displayNaam(b.door))+'</span></div>';
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(b.naam)+'</span><span style="flex:0.7;font-size:12px;color:#64748b"'+ns+'>'+esc(b.hoeveel||'')+'</span><span style="flex:1.5;font-size:12px;color:#64748b"'+ns+'>'+esc(b.leverancier||'')+' </span><span class="item-door">'+esc(displayNaam(b.door))+'</span></div>';
           }).join('') :
           '<div class="empty-small">Geen boodschappen</div>'
         ) +
@@ -626,9 +627,13 @@ function renderDashboard(el) {
   var dbBoodsIn = el.querySelector('#db-boods-in');
   if(dbBoodsBtn && dbBoodsIn) {
     var saveDashBoods = function() {
-      var naam = dbBoodsIn.value.trim();
+      var dbBoodsNaamIn = el.querySelector('#db-boods-naam');
+      var dbBoodsLevIn = el.querySelector('#db-boods-lev');
+      var naam = dbBoodsNaamIn ? dbBoodsNaamIn.value.trim() : dbBoodsIn.value.trim();
       if(!naam) return;
-      state.boodschappen.unshift({id:uid(), naam:naam, hoeveel:'', afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
+      var aantal = dbBoodsIn ? dbBoodsIn.value.trim() : '';
+      var lev = dbBoodsLevIn ? dbBoodsLevIn.value.trim() : '';
+      state.boodschappen.unshift({id:uid(), naam:naam, leverancier:lev, hoeveel:aantal, afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
       S.set('boodschappen', state.boodschappen);
       renderDashboard(el); renderNav();
     };
