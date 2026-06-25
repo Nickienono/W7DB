@@ -654,9 +654,14 @@ function renderDashboard(el) {
       var dbBoodsNaamIn = el.querySelector('#db-boods-naam');
       var dbBoodsLevIn = el.querySelector('#db-boods-lev');
       var naam = dbBoodsNaamIn ? dbBoodsNaamIn.value.trim() : dbBoodsIn.value.trim();
-      if(!naam) return;
       var aantal = dbBoodsIn ? dbBoodsIn.value.trim() : '';
       var lev = dbBoodsLevIn ? dbBoodsLevIn.value.trim() : '';
+      if(!naam||!aantal||!lev){
+        [dbBoodsNaamIn,dbBoodsIn,dbBoodsLevIn].forEach(function(f){
+          if(f&&!f.value.trim()){f.style.boxShadow='0 0 0 2px #ef4444';f.style.borderColor='#ef4444';setTimeout(function(){f.style.boxShadow='';f.style.borderColor='';},2000);}
+        });
+        return;
+      }
       state.boodschappen.unshift({id:uid(), naam:naam, leverancier:lev, hoeveel:aantal, afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
       S.set('boodschappen', state.boodschappen);
       renderDashboard(el); renderNav();
