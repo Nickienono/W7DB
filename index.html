@@ -98,6 +98,7 @@ main{padding-bottom:80px}
 .item-row.dimmed{opacity:.55}
 .check-btn{width:24px;height:24px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:none;transition:all .15s}
 .check-btn.done{background:#22c55e;border-color:#22c55e}
+.check-btn.bezig{background:#f59e0b;border-color:#f59e0b}
 .check-btn.blue-ring{border-color:#93c5fd}
 .check-btn.purple-ring{border-color:#d8b4fe}
 .check-btn:hover.blue-ring{border-color:#2563eb}
@@ -449,6 +450,7 @@ function showConfetti() {
 }
 
 function renderDashboard(el) {
+  (function(){var now=Date.now(),cut=60*24*60*60*1000,oud=state.taken.filter(function(t){return t.voltooid&&t.voltooid_op&&(now-new Date(t.voltooid_op).getTime())>cut;});if(oud.length){oud.forEach(function(t){fetch(SBURL+'/rest/v1/taken?id=eq.'+t.id,{method:'DELETE',headers:{"apikey":SBKEY,"Authorization":"Bearer "+SBKEY}});});state.taken=state.taken.filter(function(t){return!oud.find(function(d){return d.id===t.id;});});try{localStorage.setItem('w7_taken',JSON.stringify(state.taken));}catch(e){}}})();
   var week = huidigWeek();
   var jaar = new Date().getFullYear();
   var weekKey = jaar + 'W' + week;
@@ -482,11 +484,15 @@ function renderDashboard(el) {
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.tasks + ' Open taken</span></div>' +
         '<div class="quick-add-row"><input id="db-taak-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Taak toevoegen..." /><button id="db-taak-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
-        (state.taken.filter(function(t){return !t.voltooid;}).length > 0 ?
-          state.taken.filter(function(t){return !t.voltooid;}).map(function(t){
-            return '<div class="dash-item-row"><button class="check-btn" style="margin-right:8px;flex-shrink:0" data-toggle="' + t.id + '"></button><span class="dash-item-naam">' + esc(t.tekst) + '</span><span class="item-door">' + esc(displayNaam(t.door)) + '</span></div>';
+        (state.taken.length > 0 ?
+          state.taken.map(function(t){
+            var bc=t.voltooid?'done':(t.bezig?'bezig':'blue-ring');
+            var bi=t.voltooid?icon.check:(t.bezig?'<svg width="12" height="3" viewBox="0 0 12 3"><line x1="1" y1="1.5" x2="11" y2="1.5" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'')
+            var ro=t.voltooid?' style="opacity:0.55"':''
+            var ns=t.voltooid?' style="text-decoration:line-through;color:#94a3b8"':''
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle="'+t.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(t.tekst)+'</span><span class="item-door">'+esc(displayNaam(t.door))+'</span></div>';
           }).join('') :
-          '<div class="empty-small">Geen openstaande taken</div>'
+          '<div class="empty-small">Geen taken</div>'
         ) +
       '</div>' +
       '<div class="dash-section">' +
@@ -550,7 +556,7 @@ function renderDashboard(el) {
   el.querySelectorAll('[data-toggle]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var t = state.taken.find(function(x){ return x.id === btn.dataset.toggle; });
-      if (t) { t.voltooid = !t.voltooid; S.set('taken', state.taken); renderDashboard(el); renderNav(); }
+      if (t) { if(!t.bezig&&!t.voltooid){t.bezig=true;t.voltooid=false;}else if(t.bezig&&!t.voltooid){t.bezig=false;t.voltooid=true;t.voltooid_op=new Date().toISOString();}else{t.bezig=false;t.voltooid=false;t.voltooid_op=null;} S.set('taken', state.taken); renderDashboard(el); renderNav(); }
     });
   });
 
@@ -733,7 +739,7 @@ function renderTaken(el) {
   el.querySelectorAll("[data-toggle]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var t = state.taken.find(function(x){ return x.id === btn.dataset.toggle; });
-      if (t) { t.voltooid = !t.voltooid; S.set("taken", state.taken); renderTaken(el); renderNav(); }
+      if (t) { if(!t.bezig&&!t.voltooid){t.bezig=true;t.voltooid=false;}else if(t.bezig&&!t.voltooid){t.bezig=false;t.voltooid=true;t.voltooid_op=new Date().toISOString();}else{t.bezig=false;t.voltooid=false;t.voltooid_op=null;} S.set("taken", state.taken); renderTaken(el); renderNav(); }
     });
   });
   el.querySelectorAll("[data-del]").forEach(function(btn){
