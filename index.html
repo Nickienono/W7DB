@@ -454,34 +454,29 @@ function renderJaarplanningTabel(curWeek){
   var taakMap={},alle=[];
   weken.forEach(function(w){takenDezeWeek(w).forEach(function(t){if(!taakMap[t.id]){taakMap[t.id]=true;alle.push(t);}});});
   alle.sort(function(a,b){return a.id<b.id?-1:1;});
-  // Header: leeg + weeknummers als kolommen
-  var ths='<th style="padding:4px 8px;background:#f8fafc;border:1px solid #e2e8f0;font-size:10px;color:#64748b;text-align:left;position:sticky;left:0;z-index:2;white-space:nowrap">Taak</th>';
-  weken.forEach(function(w){
-    var isCur=w===curWeek;
-    ths+='<th style="padding:4px 6px;background:'+(isCur?'#fffbeb':'#f8fafc')+';border:1px solid #e2e8f0;font-size:10px;font-weight:'+(isCur?'700':'500')+';color:'+(isCur?'#f59e0b':'#64748b')+';text-align:center;white-space:nowrap">W'+w+'</th>';
-  });
-  // Rijen: een taak per rij
+  var ths='<th style="padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:600;color:#64748b;white-space:nowrap;font-size:11px;text-align:left;position:sticky;left:0;z-index:2">Week</th>';
+  alle.forEach(function(t){ths+='<th style="padding:4px 8px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:500;color:#475569;font-size:11px;white-space:nowrap" title="'+esc(t.naam)+'">'+esc(t.naam)+'</th>';});
   var trs='';
-  alle.forEach(function(t){
-    var tds='<td style="padding:3px 8px;border:1px solid #e2e8f0;font-size:10px;color:#475569;background:#fafafa;position:sticky;left:0;z-index:1;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis" title="'+esc(t.naam)+'">'+esc(t.naam)+'</td>';
-    weken.forEach(function(w){
-      var isCur=w===curWeek;
-      var weekKey=jaar+'W'+w;
-      var checks=state.planningChecks[weekKey]||[];
-      var dezeWeek=takenDezeWeek(w);
-      var dezeIds={};dezeWeek.forEach(function(x){dezeIds[x.id]=true;});
+  weken.forEach(function(w){
+    var weekKey=jaar+'W'+w;
+    var checks=state.planningChecks[weekKey]||[];
+    var dezeWeek=takenDezeWeek(w);
+    var dezeIds={};dezeWeek.forEach(function(t){dezeIds[t.id]=true;});
+    var isCur=w===curWeek;
+    var wkBg=isCur?'#fffbeb':'#f8fafc';
+    var tds='<td style="padding:4px 10px;border:1px solid #e2e8f0;font-weight:'+(isCur?'700':'500')+';color:'+(isCur?'#f59e0b':'#64748b')+';background:'+wkBg+';position:sticky;left:0;z-index:1;white-space:nowrap;font-size:12px">W'+w+(isCur?' ◄':'')+'</td>';
+    alle.forEach(function(t){
       if(dezeIds[t.id]){
         var chk=checks.indexOf(t.id)!==-1;
-        tds+='<td style="text-align:center;padding:3px;border:1px solid #e2e8f0;background:'+(isCur?'#fffbeb':'#fff')+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:18px;height:18px;border-radius:50%;border:2px solid '+(chk?'#22c55e':'#cbd5e1')+';background:'+(chk?'#22c55e':'#fff')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff">'+(chk?'✓':'')+'</button></td>';
+        tds+='<td style="text-align:center;padding:4px;border:1px solid #e2e8f0;background:'+(isCur?'#fffbeb':'#fff')+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:22px;height:22px;border-radius:50%;border:2px solid '+(chk?'#22c55e':'#cbd5e1')+';background:'+(chk?'#22c55e':'#fff')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff">'+(chk?'✓':'')+'</button></td>';
       } else {
-        tds+='<td style="text-align:center;border:1px solid #e2e8f0;background:#f8fafc;color:#e2e8f0;font-size:10px">-</td>';
+        tds+='<td style="text-align:center;border:1px solid #e2e8f0;background:#f8fafc;color:#e2e8f0;font-size:12px">-</td>';
       }
     });
     trs+='<tr>'+tds+'</tr>';
   });
-  return '<div style="width:100%;margin-top:28px;padding-bottom:24px"><div style="font-size:25px;font-weight:700;color:#1e293b;margin-bottom:14px;text-align:center">Jaarplanning</div><div style="overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)"><table style="border-collapse:collapse;font-size:10px;width:max-content;min-width:100%"><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table></div></div>';
+  return '<div style="width:100%;margin-top:28px;padding-bottom:24px"><div style="font-size:25px;font-weight:700;color:#1e293b;margin-bottom:14px">Jaarplanning</div><div style="overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)"><table style="border-collapse:collapse;font-size:12px;width:max-content;min-width:100%"><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table></div></div>';
 }
-
 function renderDashboard(el) {
   (function(){var now=Date.now(),cut=60*24*60*60*1000,oud=state.taken.filter(function(t){return t.voltooid&&t.voltooid_op&&(now-new Date(t.voltooid_op).getTime())>cut;});if(oud.length){oud.forEach(function(t){fetch(SBURL+'/rest/v1/taken?id=eq.'+t.id,{method:'DELETE',headers:{"apikey":SBKEY,"Authorization":"Bearer "+SBKEY}});});state.taken=state.taken.filter(function(t){return!oud.find(function(d){return d.id===t.id;});});try{localStorage.setItem('w7_taken',JSON.stringify(state.taken));}catch(e){}}})();
   var week = huidigWeek();
@@ -715,7 +710,7 @@ var JAARPLANNING=[
 {id:"jl05",naam:"Wasboxen controleren werking",freq:4,start:3,cat:"Leiding"},
 {id:"jl06",naam:"Voorraad automaten controleren/bestellen",freq:5,start:8,cat:"Leiding"},
 {id:"jl07",naam:"Voorraad verkoopproducten (voor BLO)",freq:4,start:2,cat:"Leiding"},
-{id:"jl08",naam:"Statiegeld inleveren",freq:6,start:5,cat:"Leiding"}
+{id:"jl08",naam:"Statiegeld inleveren",freq:1,start:5,cat:"Leiding"}
 ];
 
 function huidigWeek(){var ref=new Date(2026,5,22);var now=new Date();var days=Math.floor((now-ref)/86400000);return 26+Math.floor(days/7);}
