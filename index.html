@@ -336,6 +336,7 @@ async function sbSync(tabel, arr) {
   try {
     var h = { "apikey": SBKEY, "Authorization": "Bearer " + SBKEY, "Content-Type": "application/json" };
     if (arr.length > 0) {
+      if(tabel==='taken') arr=arr.map(function(x){return {id:x.id,tekst:x.tekst,voor:x.voor,door:x.door,voltooid:x.voltooid,aangemaakt:x.aangemaakt};});
       await fetch(SBURL + "/rest/v1/" + tabel, {
         method: "POST",
         headers: Object.assign({}, h, { "Prefer": "resolution=merge-duplicates" }),
