@@ -403,8 +403,8 @@ function renderApp() {
         <div style="font-size:11px;font-weight:400;opacity:0.75">${new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'})}</div>
       </div>
     </div>
+    <div id="weer-widget" style="position:absolute;right:25%;transform:translateX(50%);color:rgba(255,255,255,0.9);font-size:12px;display:flex;align-items:center;gap:5px;font-weight:500;pointer-events:none"></div>
     <div class="header-right">
-      <div id="weer-widget" style="color:rgba(255,255,255,0.9);font-size:12px;display:flex;align-items:center;gap:5px;margin-right:10px;font-weight:500"></div>
       <div class="user-pill">${icon.user} ${state.user}</div>
       <button class="btn-logout" id="logout-btn" title="Uitloggen">${icon.logout}</button>
     </div>
