@@ -20,13 +20,8 @@ textarea{resize:none}
 .user-pill{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.85);font-size:13px;font-weight:500}
 .btn-logout{background:none;color:rgba(255,255,255,0.6);padding:4px;border-radius:6px;display:flex}
 .btn-logout:hover{color:#64748b}
-main{padding-bottom:80px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;box-shadow:0 -1px 8px rgba(0,0,0,.06);z-index:100}
-.nav-inner{display:flex}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 3px 6px;gap:2px;background:none;color:#94a3b8;font-size:10px;font-weight:500;position:relative;transition:color .15s}
-.nav-btn.active{color:#2563eb}
-.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:#2563eb;border-radius:0 0 2px 2px}
-.nav-badge{position:absolute;top:6px;right:calc(50% - 14px);background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+main{padding-bottom:16px}
+
 
 /* Login */
 .login-screen{min-height:100vh;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
@@ -197,7 +192,7 @@ main{padding-bottom:80px}
       .plan-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
       .plan-title { font-size:14px; font-weight:700; color:#1e293b; }
       .plan-sub { font-size:12px; color:#64748b; margin-top:1px; }
-      .dash-section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;flex:1;min-width:0;display:flex;flex-direction:column}.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.section-ttl{font-weight:700;font-size:30px;color:#f07828;display:flex;align-items:center;gap:6px}.goto-tab-btn{background:none;color:#2563eb;font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;border:1px solid #bfdbfe}.quick-add-row{display:flex;gap:6px;margin-bottom:8px}.btn-add-dash{background:#2563eb;color:#fff;border-radius:8px;width:34px;height:34px;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.dash-item-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b}.dash-item-row:last-child{border-bottom:none}.dash-item-naam{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px}.item-door{font-size:11px;color:#94a3b8;flex-shrink:0;font-style:italic}.empty-small{color:#94a3b8;font-size:12px;padding:4px 0;text-align:center}
+      .dash-section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;flex:1;min-width:0;display:flex;flex-direction:column}.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.section-ttl{font-weight:700;font-size:30px;color:#f07828;display:flex;align-items:center;gap:6px;border:4px solid #000;border-radius:8px;padding:4px 12px}.goto-tab-btn{background:none;color:#2563eb;font-size:11px;font-weight:600;padding:2px 6px;border-radius:6px;border:1px solid #bfdbfe}.quick-add-row{display:flex;gap:6px;margin-bottom:8px}.btn-add-dash{background:#2563eb;color:#fff;border-radius:8px;width:34px;height:34px;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.dash-item-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b}.dash-item-row:last-child{border-bottom:none}.dash-item-naam{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px}.item-door{font-size:11px;color:#94a3b8;flex-shrink:0;font-style:italic}.empty-small{color:#94a3b8;font-size:12px;padding:4px 0;text-align:center}
       @media (max-width:640px) { .dash-layout { flex-direction:column; } .dash-left { flex-direction:column; } .dash-right { width:100%; max-height:none; } }
       </style>
 </head>
@@ -409,14 +404,7 @@ function renderApp() {
     </div>
   </div>
   <main id="main-content"></main>
-  <nav class="nav">
-    <div class="nav-inner">
-      <button class="nav-btn ${state.tab==='home'?'active':''}" data-tab="home">${icon.home}<span>Home</span></button>
-      <button class="nav-btn ${state.tab==='taken'?'active':''}" data-tab="taken">${badge(openTaken)}${icon.tasks}<span>Taken</span></button>
-      <button class="nav-btn ${state.tab==='boodschappen'?'active':''}" data-tab="boodschappen">${badge(openBoodschappen)}${icon.cart}<span>Boodschappen</span></button>
-      <button class="nav-btn ${state.tab==='aandachtspunten'?'active':''}" data-tab="aandachtspunten">${badge(openAandachtspunten)}${icon.flag}<span>Aandacht</span></button>
-    </div>
-  </nav>`;
+`;
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     state.user = null; S.set('user', null); render();
@@ -482,7 +470,7 @@ function renderJaarplanningTabel(curWeek){
     });
     trs+='<tr>'+tds+'</tr>';
   });
-  return '<div style="margin-top:28px;padding-bottom:24px;display:flex;flex-direction:column;align-items:flex-start"><div class=\"section-hdr\" style=\"margin-bottom:14px\"><span class=\"section-ttl\"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Jaarplanning</span></div><div style="overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);display:inline-block"><table style="border-collapse:collapse;font-size:11px"><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table></div></div>';
+  return '<div style="margin-top:28px;padding-bottom:24px;display:flex;flex-direction:column;align-items:flex-start"><div class=\"section-hdr\" style=\"margin-bottom:14px\"><span class=\"section-ttl\"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Jaarplanning</span></div><div style="overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block"><table style="border-collapse:collapse;font-size:11px"><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table></div></div>';
 }
 
 function renderDashboard(el) {
