@@ -470,9 +470,12 @@ function renderJaarplanningTabel(curWeek){
       var dezeIds={};dezeWeek.forEach(function(x){dezeIds[x.id]=true;});
       if(dezeIds[t.id]){
         var chk=checks.indexOf(t.id)!==-1;
-        var cellBg=chk?'#15803d':'#1d4ed8';
-        var borderCol=isCur?'#93c5fd':'#1e40af';
-        tds+='<td style="text-align:center;padding:3px;border:1px solid '+borderCol+';background:'+cellBg+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+(chk?'#4ade80':'rgba(255,255,255,0.6)')+';background:'+(chk?'#16a34a':'transparent')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff">'+(chk?'✓':'')+'</button></td>';
+        var cellBg=isCur?(chk?'#15803d':'#1d4ed8'):(chk?'#dcfce7':'#fff');
+        var borderCol=isCur?'#1e40af':'#e2e8f0';
+        var btnBorder=isCur?(chk?'#4ade80':'rgba(255,255,255,0.6)'):(chk?'#22c55e':'#cbd5e1');
+        var btnBg=isCur?(chk?'#16a34a':'transparent'):(chk?'#22c55e':'#fff');
+        var btnColor=isCur?'#fff':(chk?'#fff':'#cbd5e1');
+        tds+='<td style="text-align:center;padding:3px;border:1px solid '+borderCol+';background:'+cellBg+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+btnBorder+';background:'+btnBg+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:'+btnColor+'">'+(chk?'✓':'')+'</button></td>';
       } else {
         tds+='<td style="text-align:center;border:1px solid '+(isCur?'#93c5fd':'#e2e8f0')+';background:'+(isCur?'#eff6ff':'#f8fafc')+';color:#cbd5e1;font-size:11px">-</td>';
       }
