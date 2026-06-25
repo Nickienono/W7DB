@@ -197,6 +197,7 @@ main{padding:16px 20px 16px 20px;box-sizing:border-box;max-width:100%;overflow-x
       </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -213,8 +214,17 @@ const S = {
   var cfg={apiKey:"AIzaSyC-2yvD_lS7CpGkb1Ysg9nqAPxB3vm38v4",authDomain:"washin7-app.firebaseapp.com",databaseURL:"https://washin7-app-default-rtdb.europe-west1.firebasedatabase.app",projectId:"washin7-app",storageBucket:"washin7-app.firebasestorage.app",messagingSenderId:"276767197480",appId:"1:276767197480:web:4babd1b2f6524906b8281d"};
   try{
     firebase.initializeApp(cfg);
-    var db=firebase.database();
-    _firebaseDB=db;
+    firebase.auth().signInAnonymously().catch(function(e){console.log('Auth error:',e);});
+    firebase.auth().onAuthStateChanged(function(user){
+      if(!user)return;
+      var db=firebase.database();
+      _firebaseDB=db;
+      // Push existing localStorage to Firebase on first auth
+      Object.keys(localStorage).filter(function(k){return k.startsWith('w7_');}).forEach(function(fk){
+        var k=fk.replace('w7_','');
+        var v=localStorage.getItem(fk);
+        if(v) db.ref('w7/'+k).once('value',function(s){if(!s.exists())db.ref('w7/'+k).set({v:v,by:_myClientId});});
+      });
     var _initDone=false;
     db.ref('w7').on('value',function(snap){
       var d=snap.val();
@@ -231,6 +241,7 @@ const S = {
       if(!_initDone){_initDone=true;if(changed){setTimeout(function(){var a=document.querySelector('.nav-btn.active');if(a)a.click();},300);}}
       else if(changed){setTimeout(function(){var a=document.querySelector('.nav-btn.active');if(a)a.click();},100);}
     });
+  });
   }catch(e){console.log('Firebase error:',e);}
 })();
 
