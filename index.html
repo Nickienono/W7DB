@@ -400,6 +400,10 @@ function renderApp() {
     <div class="header-center">
       <svg viewBox="0 0 220 44" height="40" xmlns="http://www.w3.org/2000/svg"><text x="2" y="38" font-family="Arial Black,sans-serif" font-weight="900" font-size="38" fill="#f07828" letter-spacing="-1">WASHIN</text><circle cx="200" cy="22" r="20" fill="rgba(255,255,255,0.1)" stroke="#f07828" stroke-width="2.5"/><text x="200" y="31" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="24" fill="#f07828">7</text></svg>
     </div>
+    <div style="position:absolute;left:50%;transform:translateX(-50%);text-align:center;color:rgba(255,255,255,0.92);pointer-events:none">
+      <div style="font-size:13px;font-weight:700;line-height:1.2">Week ${huidigWeek()}</div>
+      <div style="font-size:11px;font-weight:400;opacity:0.75">${new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'})}</div>
+    </div>
     <div class="header-right">
       <div class="user-pill">${icon.user} ${state.user}</div>
       <button class="btn-logout" id="logout-btn" title="Uitloggen">${icon.logout}</button>
@@ -470,12 +474,9 @@ function renderJaarplanningTabel(curWeek){
       var dezeIds={};dezeWeek.forEach(function(x){dezeIds[x.id]=true;});
       if(dezeIds[t.id]){
         var chk=checks.indexOf(t.id)!==-1;
-        var cellBg=isCur?(chk?'#15803d':'#1d4ed8'):(chk?'#dcfce7':'#fff');
-        var borderCol=isCur?'#1e40af':'#e2e8f0';
-        var btnBorder=isCur?(chk?'#4ade80':'rgba(255,255,255,0.6)'):(chk?'#22c55e':'#cbd5e1');
-        var btnBg=isCur?(chk?'#16a34a':'transparent'):(chk?'#22c55e':'#fff');
-        var btnColor=isCur?'#fff':(chk?'#fff':'#cbd5e1');
-        tds+='<td style="text-align:center;padding:3px;border:1px solid '+borderCol+';background:'+cellBg+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+btnBorder+';background:'+btnBg+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:'+btnColor+'">'+(chk?'✓':'')+'</button></td>';
+        var cellBg=chk?'#15803d':'#1d4ed8';
+        var borderCol=isCur?'#93c5fd':'#1e40af';
+        tds+='<td style="text-align:center;padding:3px;border:1px solid '+borderCol+';background:'+cellBg+'"><button class="jp-cb '+(chk?'jp-done':'')+'" data-jp="'+jaar+'|'+w+'|'+t.id+'" style="width:17px;height:17px;border-radius:50%;border:2px solid '+(chk?'#4ade80':'rgba(255,255,255,0.6)')+';background:'+(chk?'#16a34a':'transparent')+';cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff">'+(chk?'✓':'')+'</button></td>';
       } else {
         tds+='<td style="text-align:center;border:1px solid '+(isCur?'#93c5fd':'#e2e8f0')+';background:'+(isCur?'#eff6ff':'#f8fafc')+';color:#cbd5e1;font-size:11px">-</td>';
       }
@@ -513,13 +514,9 @@ function renderDashboard(el) {
   el.innerHTML = '<div class="dash-layout">' +
     // Linker kolom: drie categorie-secties
     '<div class="dash-left">' +
-      '<div class="page-header" style="margin-bottom:14px"><div>' +
-        '<div class="page-title">Hallo, ' + esc(displayNaam(state.user)) + '!</div>' +
-        '<div class="page-subtitle">Week ' + week + '  -  ' + new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) + '</div>' +
-      '</div></div>' +
-      '<div class="dash-section">' +
+            '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.tasks + ' Open taken</span></div>' +
-        '<div class="quick-add-row"><input id="db-taak-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Taak toevoegen..." /><button id="db-taak-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
+        '<div class="quick-add-row"><input id="db-taak-in" class="input" style="flex:1;height:30px;font-size:12px" placeholder="Taak toevoegen..." /><button id="db-taak-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.taken.length > 0 ?
           state.taken.map(function(t){
             var bc=t.voltooid?'done':(t.bezig?'bezig':'blue-ring');
@@ -547,7 +544,7 @@ function renderDashboard(el) {
       '</div>' +
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.flag + ' Aandachtspunten</span></div>' +
-        '<div class="quick-add-row"><input id="db-aand-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Aandachtspunt toevoegen..." /><button id="db-aand-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
+        '<div class="quick-add-row"><input id="db-aand-in" class="input" style="flex:1;height:30px;font-size:12px" placeholder="Aandachtspunt toevoegen..." /><button id="db-aand-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.aandachtspunten.length > 0 ?
           state.aandachtspunten.map(function(a){
             var bc=a.afgekocht?'done':'blue-ring';
@@ -560,22 +557,6 @@ function renderDashboard(el) {
         ) +
       '</div>' +
     '</div>' +
-    // Rechter kolom: weekplanning
-    '<div class="dash-right">' +
-      '<div class="plan-header">' +
-        '<div>' +
-          '<div class="plan-title">Jaarplanning week ' + week + '</div>' +
-          '<div class="plan-sub">' + gedaan + ' / ' + totaal + ' klaar</div>' +
-        '</div>' +
-        (gedaan === totaal && totaal > 0 ? '<div class="week-done-badge">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Klaar!</div>' : '') +
-      '</div>' +
-      '<div class="plan-progress"><div class="plan-bar" style="width:' + pct + '%"></div></div>' +
-      '<div class="plan-cat-label">Personeel (' + personeel.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + personeel.length + ')</div>' +
-      personeel.map(planItem).join('') +
-      '<div class="plan-cat-label" style="margin-top:10px">Leiding (' + leiding.filter(function(t){return checks.indexOf(t.id)!==-1;}).length + '/' + leiding.length + ')</div>' +
-      leiding.map(planItem).join('') +
-    '</div>' +
-  '</div>' +
   renderJaarplanningTabel(week);
 
   // Confetti als alles net afgerond is
