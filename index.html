@@ -5,7 +5,7 @@
 <title>Washin7 Manager</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;min-height:100vh}
+body{overflow-x:hidden;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;min-height:100vh}
 button{border:none;cursor:pointer;font-family:inherit}
 input,textarea{font-family:inherit;font-size:14px}
 textarea{resize:none}
@@ -20,7 +20,7 @@ textarea{resize:none}
 .user-pill{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.85);font-size:13px;font-weight:500}
 .btn-logout{background:none;color:rgba(255,255,255,0.6);padding:4px;border-radius:6px;display:flex}
 .btn-logout:hover{color:#64748b}
-main{padding-bottom:16px}
+main{padding:16px 20px 16px 20px;box-sizing:border-box;max-width:100%;overflow-x:hidden}
 
 
 /* Login */
@@ -503,7 +503,7 @@ function renderDashboard(el) {
       '</div>';
   }
 
-  el.innerHTML = '<div class="dash-layout" style="display:flex;gap:28px;align-items:flex-start">' +
+  el.innerHTML = '<div class="dash-layout" style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;max-width:100%">' +
     '<div style="flex-shrink:0">' + renderJaarplanningTabel(week) + '</div>' +
     '<div class="dash-left" style="flex:1;min-width:0">' +
             '<div class="dash-section">' +
@@ -553,7 +553,7 @@ function renderDashboard(el) {
     '</div>' +
   '</div>';
 
-  var dashLeft=el.querySelector('.dash-left');if(dashLeft){var wc=document.createElement('div');wc.id='weer-card';wc.style.cssText='margin-top:400px;margin-left:-600px;background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:1px solid #e2e8f0';wc.innerHTML='<div style=\"display:flex;align-items:center;gap:14px;margin-bottom:14px\"><span id=\"wc-ico\" style=\"font-size:36px\">⏳<\/span><div><div id=\"wc-temp\" style=\"font-size:20px;font-weight:700;color:#1e293b\">Laden...<\/div><div style=\"font-size:12px;color:#64748b\">Den Bosch<\/div><\/div><\/div><div style=\"border-top:1px solid #f1f5f9;padding-top:14px\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:10px\"><span style=\"font-size:18px\">🔮<\/span><span style=\"font-size:14px;font-weight:700;color:#374151\">Was voorspelling<\/span><\/div><div id=\"wc-badge\" style=\"margin-bottom:8px\"><\/div><div id=\"wc-tip\" style=\"font-size:12px;color:#6b7280\"><\/div><\/div>';dashLeft.appendChild(wc);}
+  var dashLeft=el.querySelector('.dash-left');if(dashLeft){var wc=document.createElement('div');wc.id='weer-card';wc.style.cssText='margin-top:60px;background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:1px solid #e2e8f0';wc.innerHTML='<div style=\"display:flex;align-items:center;gap:14px;margin-bottom:14px\"><span id=\"wc-ico\" style=\"font-size:36px\">⏳<\/span><div><div id=\"wc-temp\" style=\"font-size:20px;font-weight:700;color:#1e293b\">Laden...<\/div><div style=\"font-size:12px;color:#64748b\">Den Bosch<\/div><\/div><\/div><div style=\"border-top:1px solid #f1f5f9;padding-top:14px\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:10px\"><span style=\"font-size:18px\">🔮<\/span><span style=\"font-size:14px;font-weight:700;color:#374151\">Was voorspelling<\/span><\/div><div id=\"wc-badge\" style=\"margin-bottom:8px\"><\/div><div id=\"wc-tip\" style=\"font-size:12px;color:#6b7280\"><\/div><\/div>';dashLeft.appendChild(wc);}
 
   // Confetti als alles net afgerond is
   if (gedaan === totaal && totaal > 0 && !wasAllesDone) {
