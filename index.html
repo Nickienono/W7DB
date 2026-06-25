@@ -346,9 +346,7 @@ async function sbSync(tabel, arr) {
         method: "DELETE", headers: h
       });
     } else {
-      await fetch(SBURL + "/rest/v1/" + tabel + "?id=neq.null", {
-        method: "DELETE", headers: h
-      });
+      // Lege array: nooit alles verwijderen uit Supabase
     }
   } catch(e) { console.warn("sbSync fout", e); }
 }
@@ -359,7 +357,6 @@ async function sbSync(tabel, arr) {
     _orig(k, v);
     if (k === "taken" || k === "boodschappen" || k === "aandachtspunten" || k === "checklisten") {
       sbSync(k, v);
-      window._lastDashWrite = Date.now();
     }
   };
 })();
@@ -633,7 +630,6 @@ function renderDashboard(el) {
   if(window._dashTimer) clearInterval(window._dashTimer);
   window._dashTimer = setInterval(function(){
     if(state.tab !== 'home'){ clearInterval(window._dashTimer); return; }
-    if(Date.now()-(window._lastDashWrite||0)<30000) return;
     Promise.all([sbLoad('taken'), sbLoad('boodschappen'), sbLoad('aandachtspunten')]).then(function(res){
       var t=res[0],b=res[1],a=res[2],changed=false;
       if(t&&JSON.stringify(t)!==JSON.stringify(state.taken)){state.taken=t;try{localStorage.setItem('w7_taken',JSON.stringify(t));}catch(e){}changed=true;}
