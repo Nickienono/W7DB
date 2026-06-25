@@ -495,14 +495,15 @@ function renderDashboard(el) {
       '</div>' +
       '<div class="dash-section">' +
         '<div class="section-hdr"><span class="section-ttl">' + icon.cart + ' Boodschappen</span></div>' +
-        '<div class="quick-add-row"><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Boodschap toevoegen..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
+        '<div class="quick-add-row" style="gap:4px"><input id="db-boods-naam" class="input" style="flex:2;height:34px;font-size:13px" placeholder="Product..." /><input id="db-boods-lev" class="input" style="flex:2;height:34px;font-size:13px" placeholder="Leverancier..." /><input id="db-boods-in" class="input" style="flex:1;height:34px;font-size:13px" placeholder="Aantal..." /><button id="db-boods-btn" class="btn-add-dash">' + icon.plus + '</button></div>' +
         (state.boodschappen.length > 0 ?
+          '<div style="display:flex;padding:2px 4px 4px 36px;font-size:11px;color:#94a3b8;font-weight:600"><span style="flex:2">Product</span><span style="flex:2;padding-left:8px">Leverancier</span><span style="flex:1;padding-left:4px">Aantal</span></div>' +
           state.boodschappen.map(function(b){
             var bc=b.afgekocht?'done':'blue-ring';
             var bi=b.afgekocht?icon.check:'';
             var ro=b.afgekocht?' style="opacity:0.55"':'';
             var ns=b.afgekocht?' style="text-decoration:line-through;color:#94a3b8"':'';
-            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam"'+ns+'>'+esc(b.naam)+(b.hoeveel?' ('+esc(b.hoeveel)+')':'')+'</span><span class="item-door">'+esc(displayNaam(b.door))+'</span></div>';
+            return '<div class="dash-item-row"'+ro+'><button class="check-btn '+bc+'" style="margin-right:8px;flex-shrink:0" data-toggle-boods="'+b.id+'">'+bi+'</button><span class="dash-item-naam" style="flex:2"'+ns+'>'+esc(b.naam)+'</span>'+(b.afgekocht?'<span style="flex:2;font-size:12px;color:#94a3b8;text-decoration:line-through;padding-left:8px">':'<span style="flex:2;font-size:12px;color:#64748b;padding-left:8px">')+esc(b.leverancier||'')+'</span>'+(b.afgekocht?'<span style="flex:1;font-size:12px;color:#94a3b8;text-decoration:line-through;padding-left:4px">':'<span style="flex:1;font-size:12px;color:#64748b;padding-left:4px">')+esc(b.hoeveel||'')+'</span></div>';
           }).join('') :
           '<div class="empty-small">Geen boodschappen</div>'
         ) +
@@ -598,17 +599,21 @@ function renderDashboard(el) {
 
   // Quick-add boodschappen vanuit dashboard
   var dbBoodsBtn = el.querySelector('#db-boods-btn');
+  var dbBoodsNaamIn = el.querySelector('#db-boods-naam');
+  var dbBoodsLevIn = el.querySelector('#db-boods-lev');
   var dbBoodsIn = el.querySelector('#db-boods-in');
-  if(dbBoodsBtn && dbBoodsIn) {
+  if(dbBoodsBtn && dbBoodsNaamIn) {
     var saveDashBoods = function() {
-      var naam = dbBoodsIn.value.trim();
+      var naam = dbBoodsNaamIn.value.trim();
       if(!naam) return;
-      state.boodschappen.unshift({id:uid(), naam:naam, hoeveel:'', afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
+      var lev = dbBoodsLevIn ? dbBoodsLevIn.value.trim() : '';
+      var aantal = dbBoodsIn ? dbBoodsIn.value.trim() : '';
+      state.boodschappen.unshift({id:uid(), naam:naam, leverancier:lev, hoeveel:aantal, afgekocht:false, door:state.user, aangemaakt:new Date().toISOString()});
       S.set('boodschappen', state.boodschappen);
       renderDashboard(el); renderNav();
     };
     dbBoodsBtn.addEventListener('click', saveDashBoods);
-    dbBoodsIn.addEventListener('keydown', function(e){ if(e.key==='Enter') saveDashBoods(); });
+    [dbBoodsNaamIn,dbBoodsLevIn,dbBoodsIn].filter(Boolean).forEach(function(inp){inp.addEventListener('keydown', function(e){ if(e.key==='Enter') saveDashBoods(); }); });
   }
 
   // Quick-add aandachtspunten vanuit dashboard
